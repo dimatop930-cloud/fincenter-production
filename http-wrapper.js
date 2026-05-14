@@ -1,1 +1,1 @@
-import "./index.js";
+console.log("HTTP WRAPPER START");
