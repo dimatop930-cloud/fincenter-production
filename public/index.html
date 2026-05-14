@@ -1,0 +1,6678 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <title>FinCenter</title>
+ <style>
+  :root {
+   --bg: #050914;
+   --sidebar: #070d1a;
+   --card: #0b1424;
+   --card2: #101b2d;
+   --line: rgba(255,255,255,.09);
+   --line2: rgba(255,255,255,.16);
+   --text: #f7f9ff;
+   --muted: #8793aa;
+   --soft: #cbd5e1;
+   --purple: #6d5dfc;
+   --purple2: #8b5cf6;
+   --blue: #3b82f6;
+   --cyan: #22d3ee;
+   --green: #22c55e;
+   --red: #f43f5e;
+   --orange: #fb923c;
+   --yellow: #facc15;
+   --radius: 18px;
+   --shadow: 0 24px 80px rgba(0,0,0,.45);
+   --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+   --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body.light {
+   --bg: #f7eefb;
+   --sidebar: rgba(255,255,255,.72);
+   --card: rgba(255,255,255,.74);
+   --card2: rgba(255,255,255,.58);
+   --line: rgba(107, 70, 193, .16);
+   --line2: rgba(107, 70, 193, .28);
+   --text: #172033;
+   --muted: #667085;
+   --soft: #334155;
+   --purple: #8b5cf6;
+   --purple2: #ec4899;
+   --blue: #38bdf8;
+   --cyan: #06b6d4;
+   --green: #10b981;
+   --red: #f43f5e;
+   --orange: #fb923c;
+   --yellow: #eab308;
+  }
+
+  body {
+   margin: 0;
+   min-height: 100vh;
+   font-family: var(--font);
+   color: var(--text);
+   background:
+    radial-gradient(circle at 22% 0%, rgba(109,93,252,.22), transparent 30%),
+    radial-gradient(circle at 88% 12%, rgba(59,130,246,.12), transparent 28%),
+    linear-gradient(180deg, #030712, var(--bg));
+   overflow-x: hidden;
+  }
+
+  button, input, select, textarea { font: inherit; }
+  button { cursor: pointer; }
+
+  .app {
+   display: grid;
+   grid-template-columns: 270px minmax(0, 1fr);
+   min-height: 100vh;
+  }
+
+  .sidebar {
+   position: sticky;
+   top: 0;
+   height: 100vh;
+   background: linear-gradient(180deg, rgba(14,23,43,.98), rgba(5,9,20,.98));
+   border-right: 1px solid var(--line);
+   padding: 22px 14px;
+   display: flex;
+   flex-direction: column;
+   gap: 22px;
+   z-index: 20;
+  }
+
+  .brand {
+   display: flex;
+   align-items: center;
+   gap: 12px;
+   padding: 0 6px 14px;
+  }
+
+  .logo {
+   width: 38px;
+   height: 38px;
+   border-radius: 999px;
+   background: linear-gradient(135deg, var(--purple), var(--blue));
+   display: grid;
+   place-items: center;
+   box-shadow: 0 12px 32px rgba(109,93,252,.38);
+   font-weight: 900;
+  }
+
+  .brand h1 {
+   margin: 0;
+   font-size: 20px;
+   letter-spacing: -.04em;
+  }
+
+  .nav {
+   display: grid;
+   gap: 8px;
+  }
+
+  .nav button {
+   width: 100%;
+   border: 0;
+   background: transparent;
+   color: var(--soft);
+   border-radius: 12px;
+   padding: 13px 14px;
+   display: flex;
+   align-items: center;
+   gap: 12px;
+   text-align: left;
+   transition: .18s ease;
+   font-weight: 700;
+  }
+
+  .nav button:hover,
+  .nav button.active {
+   background: linear-gradient(135deg, rgba(109,93,252,.92), rgba(73,52,199,.86));
+   color: white;
+   box-shadow: 0 12px 30px rgba(109,93,252,.22);
+  }
+
+  .nav span:first-child {
+   width: 22px;
+   text-align: center;
+  }
+
+  .premium {
+   margin-top: auto;
+   border: 1px solid rgba(139,92,246,.24);
+   background: linear-gradient(180deg, rgba(20,28,48,.9), rgba(12,18,33,.9));
+   border-radius: 18px;
+   padding: 16px;
+   box-shadow: 0 18px 50px rgba(0,0,0,.25);
+  }
+
+  .premium .crown {
+   width: 36px;
+   height: 36px;
+   border-radius: 999px;
+   background: rgba(250,204,21,.12);
+   display: grid;
+   place-items: center;
+   color: var(--yellow);
+   margin-bottom: 10px;
+  }
+
+  .premium b { display: block; font-size: 13px; }
+  .premium small { display: block; color: var(--muted); line-height: 1.45; margin: 10px 0 14px; }
+
+  .premium button {
+   width: 100%;
+   border: 0;
+   background: linear-gradient(135deg, var(--purple), var(--purple2));
+   color: white;
+   border-radius: 10px;
+   padding: 11px;
+   font-weight: 800;
+  }
+
+  .version {
+   color: var(--muted);
+   font-size: 11px;
+   line-height: 1.8;
+  }
+
+  .main {
+   min-width: 0;
+   padding: 22px 24px 26px;
+  }
+
+  .topbar {
+   height: 58px;
+   display: grid;
+   grid-template-columns: minmax(280px, 1fr) auto;
+   gap: 16px;
+   align-items: center;
+   margin-bottom: 20px;
+  }
+
+  .search {
+   height: 46px;
+   border: 1px solid var(--line);
+   background: rgba(10,18,33,.84);
+   border-radius: 12px;
+   display: flex;
+   align-items: center;
+   gap: 10px;
+   padding: 0 14px;
+   max-width: 720px;
+  }
+
+  .search input {
+   width: 100%;
+   border: 0;
+   outline: 0;
+   background: transparent;
+   color: var(--text);
+  }
+
+  .top-actions {
+   display: flex;
+   align-items: center;
+   gap: 10px;
+  }
+
+  .icon-btn,
+  .google-btn,
+  .purple-btn,
+  .ghost-btn,
+  .danger-btn {
+   border: 1px solid var(--line);
+   color: var(--text);
+   background: rgba(12,20,36,.86);
+   border-radius: 11px;
+   min-height: 42px;
+   padding: 0 14px;
+   font-weight: 800;
+   transition: .16s ease;
+   white-space: nowrap;
+  }
+
+  .icon-btn {
+   width: 42px;
+   padding: 0;
+   display: grid;
+   place-items: center;
+  }
+
+  .google-btn {
+   display: flex;
+   align-items: center;
+   gap: 10px;
+  }
+
+  .google-icon {
+   font-weight: 1000;
+   color: #4285f4;
+   font-size: 18px;
+  }
+
+  .purple-btn {
+   background: linear-gradient(135deg, var(--purple), var(--purple2));
+   border: 0;
+   color: white;
+   box-shadow: 0 12px 30px rgba(109,93,252,.23);
+  }
+
+  .danger-btn {
+   color: #ff9aac;
+   border-color: rgba(244,63,94,.26);
+   background: rgba(244,63,94,.09);
+  }
+
+  .icon-btn:hover,
+  .google-btn:hover,
+  .purple-btn:hover,
+  .ghost-btn:hover,
+  .danger-btn:hover {
+   transform: translateY(-1px);
+   border-color: var(--line2);
+  }
+
+  .user-card {
+   display: flex;
+   align-items: center;
+   gap: 10px;
+   border: 1px solid var(--line);
+   background: rgba(12,20,36,.86);
+   border-radius: 14px;
+   padding: 7px 12px 7px 8px;
+   min-width: 210px;
+  }
+
+  .avatar {
+   width: 38px;
+   height: 38px;
+   border-radius: 999px;
+   background: linear-gradient(135deg, #f59e0b, #ef4444);
+   display: grid;
+   place-items: center;
+   font-weight: 1000;
+   background-size: cover;
+   background-position: center;
+  }
+
+  .user-card b { display: block; font-size: 13px; }
+  .user-card small { display: block; color: var(--muted); font-size: 11px; }
+
+  .view {
+   display: none;
+   gap: 18px;
+   min-width: 0;
+  }
+
+  .view.active {
+   display: grid;
+  }
+
+  .page-head {
+   display: flex;
+   align-items: end;
+   justify-content: space-between;
+   gap: 16px;
+   margin-bottom: 16px;
+  }
+
+  .page-head h2 {
+   margin: 0;
+   font-size: 28px;
+   letter-spacing: -.045em;
+  }
+
+  .page-head p {
+   margin: 4px 0 0;
+   color: var(--muted);
+   font-size: 14px;
+  }
+
+  .head-actions {
+   display: flex;
+   gap: 9px;
+   align-items: center;
+   flex-wrap: wrap;
+  }
+
+  .cards {
+   display: grid;
+   grid-template-columns: 1.35fr 1fr 1fr 1fr;
+   gap: 16px;
+   margin-bottom: 18px;
+  }
+
+  .card {
+   position: relative;
+   overflow: hidden;
+   background:
+    radial-gradient(circle at 92% 18%, rgba(109,93,252,.12), transparent 35%),
+    linear-gradient(180deg, rgba(17,27,47,.9), rgba(10,18,33,.92));
+   border: 1px solid var(--line);
+   border-radius: var(--radius);
+   padding: 22px;
+   box-shadow: 0 14px 38px rgba(0,0,0,.20);
+   min-height: 126px;
+  }
+
+  .card-title { color: var(--muted); font-size: 13px; margin-bottom: 16px; font-weight: 700; }
+  .card-value { font-size: 31px; font-weight: 900; letter-spacing: -.05em; margin-bottom: 10px; }
+  .card-sub { font-size: 12px; color: var(--muted); }
+  .positive { color: var(--green); }
+  .negative { color: var(--red); }
+  .cyan { color: var(--cyan); }
+
+  .metric-icon {
+   width: 42px;
+   height: 42px;
+   border-radius: 999px;
+   display: grid;
+   place-items: center;
+   margin-bottom: 16px;
+  }
+
+  .metric-icon.green { background: rgba(34,197,94,.14); color: var(--green); }
+  .metric-icon.red { background: rgba(244,63,94,.14); color: var(--red); }
+  .metric-icon.blue { background: rgba(59,130,246,.14); color: var(--blue); }
+
+  .spark {
+   position: absolute;
+   right: 18px;
+   bottom: 18px;
+   width: 150px;
+   height: 55px;
+   opacity: .9;
+  }
+
+  .panel {
+   background: linear-gradient(180deg, rgba(17,27,47,.94), rgba(9,16,30,.94));
+   border: 1px solid var(--line);
+   border-radius: 18px;
+   padding: 20px;
+   box-shadow: 0 14px 38px rgba(0,0,0,.20);
+   min-width: 0;
+  }
+
+  .panel h3 {
+   margin: 0 0 16px;
+   font-size: 18px;
+   letter-spacing: -.02em;
+  }
+
+  .grid2 {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   gap: 18px;
+  }
+
+  .grid3 {
+   display: grid;
+   grid-template-columns: repeat(3, 1fr);
+   gap: 18px;
+  }
+
+  .grid4 {
+   display: grid;
+   grid-template-columns: repeat(4, 1fr);
+   gap: 16px;
+  }
+
+  .form-grid {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   gap: 12px;
+  }
+
+  .field {
+   display: grid;
+   gap: 7px;
+  }
+
+  .field.full {
+   grid-column: 1 / -1;
+  }
+
+  .field label {
+   color: var(--soft);
+   font-size: 12px;
+   font-weight: 800;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+   width: 100%;
+   border: 1px solid var(--line);
+   background: rgba(8,14,26,.92);
+   color: var(--text);
+   border-radius: 10px;
+   min-height: 42px;
+   padding: 0 12px;
+   outline: 0;
+  }
+
+  .field textarea {
+   min-height: 78px;
+   resize: vertical;
+   padding: 12px;
+  }
+
+  .type-toggle {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   gap: 8px;
+  }
+
+  .type-toggle button {
+   height: 43px;
+   border: 1px solid var(--line);
+   background: rgba(8,14,26,.92);
+   color: var(--muted);
+   border-radius: 10px;
+   font-weight: 900;
+  }
+
+  .type-toggle button.active-expense {
+   background: rgba(244,63,94,.22);
+   color: white;
+   border-color: rgba(244,63,94,.42);
+  }
+
+  .type-toggle button.active-income {
+   background: rgba(34,197,94,.18);
+   color: white;
+   border-color: rgba(34,197,94,.40);
+  }
+
+  .recent-list {
+   display: grid;
+   gap: 9px;
+  }
+
+  .recent-item {
+   display: grid;
+   grid-template-columns: auto 1fr auto;
+   gap: 12px;
+   align-items: center;
+   border: 1px solid var(--line);
+   background: rgba(8,14,26,.6);
+   border-radius: 10px;
+   padding: 10px 12px;
+  }
+
+  .recent-dot {
+   width: 28px;
+   height: 28px;
+   border-radius: 999px;
+   display: grid;
+   place-items: center;
+   font-size: 14px;
+  }
+
+  .recent-dot.income {
+   color: var(--green);
+   background: rgba(34,197,94,.14);
+  }
+
+  .recent-dot.expense {
+   color: var(--red);
+   background: rgba(244,63,94,.14);
+  }
+
+  .recent-title { font-weight: 900; font-size: 13px; }
+  .recent-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .amount { font-weight: 1000; font-size: 13px; }
+
+  .table-shell {
+   border: 1px solid var(--line);
+   background: linear-gradient(180deg, rgba(13,22,39,.96), rgba(8,15,28,.96));
+   border-radius: 18px;
+   overflow: hidden;
+   box-shadow: 0 16px 40px rgba(0,0,0,.22);
+   min-width: 0;
+  }
+
+  .table-tabs {
+   display: flex;
+   align-items: center;
+   gap: 22px;
+   border-bottom: 1px solid var(--line);
+   padding: 0 18px;
+   min-height: 58px;
+   overflow-x: auto;
+  }
+
+  .tab {
+   height: 58px;
+   border: 0;
+   background: transparent;
+   color: var(--muted);
+   font-weight: 800;
+   position: relative;
+   white-space: nowrap;
+  }
+
+  .tab.active { color: var(--purple2); }
+  .tab.active:after {
+   content: "";
+   position: absolute;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   height: 2px;
+   background: var(--purple2);
+   border-radius: 999px;
+  }
+
+
+  .table-tab-content {
+   display: none;
+  }
+
+  .table-tab-content.active {
+   display: block;
+  }
+
+  .table-toolbar {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   gap: 14px;
+   padding: 16px 18px;
+   border-bottom: 1px solid var(--line);
+   flex-wrap: wrap;
+  }
+
+  .toolbar-group {
+   display: flex;
+   align-items: center;
+   gap: 12px;
+   flex-wrap: wrap;
+  }
+
+  .mini-label {
+   color: var(--soft);
+   font-size: 12px;
+   font-weight: 700;
+  }
+
+  .select {
+   border: 1px solid var(--line);
+   background: rgba(12,20,36,.86);
+   color: var(--text);
+   border-radius: 10px;
+   height: 40px;
+   padding: 0 12px;
+   outline: 0;
+  }
+
+  .sheet-wrap {
+   width: 100%;
+   overflow-x: auto;
+   overflow-y: auto;
+   max-height: calc(100vh - 245px);
+   border-top: 1px solid rgba(255,255,255,.04);
+  }
+
+  /*
+   100% FIT MODE:
+   Таблица теперь растягивается на всю доступную ширину.
+   Колонки используют процентную ширину и не заставляют сайт расширяться.
+  */
+  .sheet {
+   border-collapse: collapse;
+   width: 100%;
+   table-layout: fixed;
+   font-family: var(--mono);
+   font-size: clamp(8px, 0.47vw, 11px);
+   color: #dbe7ff;
+  }
+
+  .sheet th,
+  .sheet td {
+   border: 1px solid rgba(255,255,255,.075);
+   height: 30px;
+   padding: 0;
+   text-align: right;
+   vertical-align: middle;
+   position: relative;
+   overflow: hidden;
+  }
+
+  .sheet th {
+   background: rgba(15,23,42,.95);
+   color: #8b99b6;
+   font-weight: 800;
+   text-align: center;
+   position: sticky;
+   top: 0;
+   z-index: 5;
+  }
+
+  .sheet .row-num {
+   width: 34px;
+   max-width: 34px;
+   min-width: 34px;
+   text-align: center;
+   color: #8793aa;
+   background: rgba(5,10,20,.96);
+   position: sticky;
+   left: 0;
+   z-index: 4;
+  }
+
+  .sheet th.row-num {
+   z-index: 8;
+   top: 0;
+  }
+
+  .sheet .label-cell {
+   text-align: left;
+   padding: 0 5px;
+   font-weight: 800;
+   color: #f8fbff;
+   background: rgba(6,10,18,.78);
+  }
+
+  .sheet .life { background: rgba(15,54,116,.58); }
+  .sheet .fun { background: rgba(91,22,57,.56); }
+  .sheet .future { background: rgba(20,83,45,.56); }
+
+  .sheet .group-title {
+   text-align: center;
+   font-weight: 1000;
+   color: white;
+   font-family: var(--font);
+   background: rgba(15,23,42,.96);
+   font-size: clamp(9px, .62vw, 12px);
+  }
+
+  .sheet .life-title { background: rgba(18,62,137,.82); }
+  .sheet .fun-title { background: rgba(101,29,73,.82); }
+  .sheet .future-title { background: rgba(22,101,52,.82); }
+
+  .sheet input {
+   width: 100%;
+   height: 100%;
+   border: 0;
+   outline: 0;
+   background: transparent;
+   color: #e6f0ff;
+   font: inherit;
+   text-align: right;
+   padding: 0 3px;
+   min-width: 0;
+  }
+
+  .sheet input:focus {
+   box-shadow: inset 0 0 0 2px #4b7cff;
+   background: rgba(59,130,246,.18);
+  }
+
+  .sheet .label-cell input {
+   text-align: left;
+   font-weight: 800;
+  }
+
+  .sheet .total-row td {
+   background: rgba(7,13,24,.96);
+   font-weight: 900;
+   color: #e8f0ff;
+  }
+
+  .sheet .summary-row td {
+   background: rgba(9,17,31,.96);
+   font-weight: 900;
+   color: #cfe0ff;
+  }
+
+  .chart-card {
+   min-height: 360px;
+  }
+
+  .donut-row {
+   display: grid;
+   grid-template-columns: 230px 1fr;
+   gap: 20px;
+   align-items: center;
+  }
+
+  .legend {
+   display: grid;
+   gap: 10px;
+  }
+
+  .legend-item {
+   display: grid;
+   grid-template-columns: auto 1fr auto;
+   align-items: center;
+   gap: 10px;
+   color: var(--soft);
+   font-size: 13px;
+  }
+
+  .legend-color {
+   width: 10px;
+   height: 10px;
+   border-radius: 999px;
+  }
+
+  .quick-actions {
+   display: grid;
+   grid-template-columns: repeat(4, 1fr);
+   gap: 10px;
+  }
+
+  .quick-card {
+   min-height: 88px;
+   border: 1px solid var(--line);
+   background: rgba(8,14,26,.7);
+   border-radius: 12px;
+   color: var(--soft);
+   display: grid;
+   place-items: center;
+   gap: 8px;
+   font-weight: 900;
+   text-align: center;
+   padding: 12px;
+   transition: .16s ease;
+  }
+
+  .quick-card:hover {
+   border-color: var(--line2);
+   transform: translateY(-1px);
+   color: white;
+  }
+
+  .footer-strip {
+   border: 1px solid var(--line);
+   background: rgba(9,16,30,.82);
+   border-radius: 16px;
+   display: grid;
+   grid-template-columns: repeat(4, 1fr);
+   overflow: hidden;
+  }
+
+  .footer-item {
+   padding: 16px 18px;
+   display: grid;
+   grid-template-columns: auto 1fr;
+   gap: 12px;
+   align-items: center;
+   border-right: 1px solid var(--line);
+  }
+
+  .footer-item:last-child { border-right: 0; }
+
+  .footer-icon {
+   width: 34px;
+   height: 34px;
+   border-radius: 10px;
+   display: grid;
+   place-items: center;
+   background: rgba(34,197,94,.14);
+   color: var(--green);
+  }
+
+  .footer-item b { display: block; font-size: 13px; }
+  .footer-item small { display: block; color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+  .info-box {
+   border: 1px solid rgba(59,130,246,.22);
+   background: rgba(59,130,246,.08);
+   color: #dbeafe;
+   border-radius: 14px;
+   padding: 14px;
+   line-height: 1.55;
+  }
+
+  .toast-zone {
+   position: fixed;
+   right: 18px;
+   bottom: 18px;
+   z-index: 100;
+   display: grid;
+   gap: 10px;
+   width: min(390px, calc(100vw - 36px));
+  }
+
+  .toast {
+   border: 1px solid var(--line2);
+   background: rgba(17,27,47,.95);
+   backdrop-filter: blur(18px);
+   color: var(--text);
+   border-radius: 14px;
+   padding: 14px 15px;
+   box-shadow: var(--shadow);
+   animation: toastIn .24s ease both;
+  }
+
+
+  .sheet .life { background: rgba(37, 99, 235, .20); }
+  .sheet .fun { background: rgba(124, 58, 237, .18); }
+  .sheet .future { background: rgba(16, 185, 129, .16); }
+
+  .sheet .life-title {
+   background: linear-gradient(135deg, rgba(37,99,235,.82), rgba(59,130,246,.42));
+  }
+
+  .sheet .fun-title {
+   background: linear-gradient(135deg, rgba(124,58,237,.82), rgba(168,85,247,.40));
+  }
+
+  .sheet .future-title {
+   background: linear-gradient(135deg, rgba(16,185,129,.78), rgba(34,197,94,.38));
+  }
+
+  .sheet th,
+  .sheet td {
+   border-color: rgba(148,163,184,.11);
+  }
+
+  .sheet input:focus {
+   box-shadow: inset 0 0 0 2px rgba(139,92,246,.95);
+   background: rgba(139,92,246,.18);
+  }
+
+  .module-list {
+   display: grid;
+   gap: 12px;
+  }
+
+  .module-item {
+   border: 1px solid var(--line);
+   background: rgba(8,14,26,.62);
+   border-radius: 14px;
+   padding: 14px;
+   display: grid;
+   gap: 10px;
+  }
+
+  .module-row {
+   display: flex;
+   justify-content: space-between;
+   gap: 12px;
+   align-items: center;
+   flex-wrap: wrap;
+  }
+
+  .module-title {
+   font-weight: 900;
+   color: var(--text);
+  }
+
+  .module-meta {
+   color: var(--muted);
+   font-size: 12px;
+   line-height: 1.5;
+  }
+
+  .progress {
+   height: 9px;
+   background: rgba(148,163,184,.13);
+   border-radius: 999px;
+   overflow: hidden;
+  }
+
+  .progress span {
+   display: block;
+   height: 100%;
+   background: linear-gradient(90deg, var(--purple), var(--cyan));
+   border-radius: 999px;
+   width: 0%;
+  }
+
+  .mini-btn {
+   border: 1px solid var(--line);
+   background: rgba(12,20,36,.86);
+   color: var(--text);
+   border-radius: 9px;
+   min-height: 32px;
+   padding: 0 10px;
+   font-weight: 800;
+  }
+
+  .mini-btn.danger {
+   color: #ff9aac;
+   border-color: rgba(244,63,94,.3);
+   background: rgba(244,63,94,.09);
+  }
+
+  .empty-state {
+   min-height: 160px;
+   display: grid;
+   place-items: center;
+   border: 1px dashed var(--line2);
+   border-radius: 14px;
+   color: var(--muted);
+   text-align: center;
+   padding: 20px;
+  }
+
+  .section-kpi {
+   display: grid;
+   grid-template-columns: repeat(3, 1fr);
+   gap: 12px;
+   margin-bottom: 16px;
+  }
+
+  .section-kpi .kpi {
+   border: 1px solid var(--line);
+   background: rgba(8,14,26,.62);
+   border-radius: 14px;
+   padding: 14px;
+  }
+
+  .section-kpi b {
+   display: block;
+   font-size: 20px;
+   margin-top: 5px;
+  }
+
+  .section-kpi small {
+   color: var(--muted);
+   font-weight: 800;
+  }
+
+  @media (max-width: 760px) {
+   .section-kpi { grid-template-columns: 1fr; }
+  }
+
+  
+    .modal-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.62);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index: 99999;
+      padding:20px;
+    }
+
+    .modal-overlay.active{
+      display:flex;
+    }
+
+    .modal{
+      width:min(520px,100%);
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(17,27,47,.98), rgba(9,16,30,.98));
+      border-radius:22px;
+      padding:22px;
+      box-shadow:0 40px 100px rgba(0,0,0,.45);
+    }
+
+    .modal-head{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      margin-bottom:18px;
+    }
+
+    .modal-head h3{
+      margin:0;
+      font-size:24px;
+    }
+
+    .custom-tag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border:1px solid rgba(139,92,246,.25);
+      background:rgba(139,92,246,.12);
+      color:#d8c7ff;
+      border-radius:999px;
+      padding:4px 10px;
+      font-size:11px;
+      font-weight:900;
+    }
+
+
+    @keyframes toastIn {
+   from { transform: translateY(12px); opacity: 0; }
+   to { transform: translateY(0); opacity: 1; }
+  }
+
+  @media (max-width: 1300px) {
+   .app { grid-template-columns: 86px minmax(0, 1fr); }
+   .sidebar { padding: 18px 10px; }
+   .brand h1, .nav button span:last-child, .premium, .version { display: none; }
+   .brand { justify-content: center; }
+   .nav button { justify-content: center; }
+   .cards, .grid4 { grid-template-columns: repeat(2, 1fr); }
+   .grid2, .grid3 { grid-template-columns: 1fr; }
+   .sheet { font-size: clamp(7px, .62vw, 10px); }
+  }
+
+  @media (max-width: 760px) {
+   .app { grid-template-columns: 1fr; }
+   .sidebar { display: none; }
+   .main { padding: 14px; }
+   .topbar { grid-template-columns: 1fr; height: auto; }
+   .top-actions { overflow-x: auto; padding-bottom: 2px; }
+   .cards, .form-grid, .footer-strip, .quick-actions { grid-template-columns: 1fr; }
+   .page-head { align-items: start; flex-direction: column; }
+   .donut-row { grid-template-columns: 1fr; }
+   .sheet-wrap { max-height: 70vh; }
+   .sheet { min-width: 1180px; font-size: 10px; }
+  }
+ 
+/* FINCENTER LIGHT THEME — soft aurora pink */
+body.light {
+  background:
+    radial-gradient(circle at 14% 0%, rgba(236,72,153,.24), transparent 34%),
+    radial-gradient(circle at 80% 6%, rgba(56,189,248,.22), transparent 32%),
+    radial-gradient(circle at 55% 90%, rgba(139,92,246,.16), transparent 38%),
+    linear-gradient(135deg, #fff7fb 0%, #eef8ff 48%, #f8f1ff 100%);
+}
+
+body.light .sidebar {
+  background: linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,246,252,.78));
+  border-right: 1px solid rgba(139,92,246,.14);
+  box-shadow: 18px 0 60px rgba(139,92,246,.08);
+  backdrop-filter: blur(22px);
+}
+
+body.light .main {
+  background:
+    radial-gradient(circle at 25% 0%, rgba(236,72,153,.08), transparent 36%),
+    radial-gradient(circle at 90% 20%, rgba(14,165,233,.08), transparent 34%);
+}
+
+body.light .card,
+body.light .panel,
+body.light .table-shell,
+body.light .footer-strip,
+body.light .user-card,
+body.light .search,
+body.light .icon-btn,
+body.light .google-btn,
+body.light .ghost-btn,
+body.light .quick-card,
+body.light .recent-item,
+body.light .module-item,
+body.light .section-kpi .kpi {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.56));
+  border-color: rgba(139,92,246,.14);
+  box-shadow: 0 18px 55px rgba(139,92,246,.10);
+  backdrop-filter: blur(18px);
+}
+
+body.light .card {
+  background:
+    radial-gradient(circle at 90% 16%, rgba(236,72,153,.16), transparent 38%),
+    radial-gradient(circle at 8% 0%, rgba(56,189,248,.12), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.58));
+}
+
+body.light .premium {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.70), rgba(255,242,250,.70));
+  border-color: rgba(236,72,153,.18);
+  box-shadow: 0 22px 60px rgba(236,72,153,.12);
+}
+
+body.light .nav button {
+  color: #475569;
+}
+
+body.light .nav button:hover,
+body.light .nav button.active {
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  color: #fff;
+}
+
+body.light .field input,
+body.light .field select,
+body.light .field textarea,
+body.light .select,
+body.light .search input {
+  background: rgba(255,255,255,.72);
+  color: #172033;
+  border-color: rgba(139,92,246,.16);
+}
+
+body.light .sheet {
+  color: #172033;
+}
+
+body.light .sheet th {
+  background: rgba(255,255,255,.92);
+  color: #64748b;
+}
+
+body.light .sheet .row-num {
+  background: rgba(255,255,255,.92);
+  color: #64748b;
+}
+
+body.light .sheet .label-cell {
+  background: rgba(255,255,255,.68);
+  color: #172033;
+}
+
+body.light .sheet input {
+  color: #172033;
+}
+
+body.light .sheet .total-row td,
+body.light .sheet .summary-row td {
+  background: rgba(255,255,255,.86);
+  color: #172033;
+}
+
+body.light .sheet .life { background: rgba(56,189,248,.16); }
+body.light .sheet .fun { background: rgba(236,72,153,.14); }
+body.light .sheet .future { background: rgba(16,185,129,.14); }
+
+body.light .sheet .life-title {
+  background: linear-gradient(135deg, rgba(56,189,248,.88), rgba(139,92,246,.38));
+}
+body.light .sheet .fun-title {
+  background: linear-gradient(135deg, rgba(236,72,153,.82), rgba(139,92,246,.36));
+}
+body.light .sheet .future-title {
+  background: linear-gradient(135deg, rgba(16,185,129,.76), rgba(56,189,248,.34));
+}
+
+body.light .info-box {
+  background: rgba(236,72,153,.08);
+  border-color: rgba(236,72,153,.18);
+  color: #334155;
+}
+
+body.light .toast {
+  background: rgba(255,255,255,.92);
+  color: #172033;
+  border-color: rgba(139,92,246,.16);
+}
+
+ 
+/* FINCENTER AURORA V2 — rose + sky + mint */
+body.light {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255, 99, 164, .30), transparent 34%),
+    radial-gradient(circle at 78% 4%, rgba(56, 189, 248, .30), transparent 34%),
+    radial-gradient(circle at 52% 82%, rgba(45, 212, 191, .20), transparent 36%),
+    linear-gradient(135deg, #fff2f8 0%, #eef9ff 43%, #f4fff8 100%);
+}
+
+body.light .main {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 99, 164, .10), transparent 34%),
+    radial-gradient(circle at 75% 8%, rgba(56, 189, 248, .12), transparent 36%),
+    radial-gradient(circle at 54% 86%, rgba(45, 212, 191, .11), transparent 38%);
+}
+
+body.light .logo,
+body.light .purple-btn,
+body.light .premium button,
+body.light .nav button:hover,
+body.light .nav button.active {
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 52%, #2dd4bf 100%);
+}
+
+body.light .card:nth-child(1) {
+  background:
+    radial-gradient(circle at 90% 18%, rgba(139,92,246,.20), transparent 36%),
+    radial-gradient(circle at 12% 4%, rgba(236,72,153,.16), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.84), rgba(255,255,255,.58));
+}
+
+body.light .card:nth-child(2) {
+  background:
+    radial-gradient(circle at 90% 18%, rgba(45,212,191,.23), transparent 36%),
+    linear-gradient(180deg, rgba(255,255,255,.84), rgba(236,253,245,.56));
+}
+
+body.light .card:nth-child(3) {
+  background:
+    radial-gradient(circle at 90% 18%, rgba(244,63,94,.20), transparent 36%),
+    linear-gradient(180deg, rgba(255,255,255,.84), rgba(255,241,242,.58));
+}
+
+body.light .card:nth-child(4) {
+  background:
+    radial-gradient(circle at 90% 18%, rgba(56,189,248,.24), transparent 36%),
+    linear-gradient(180deg, rgba(255,255,255,.84), rgba(239,246,255,.58));
+}
+
+body.light .panel,
+body.light .table-shell,
+body.light .footer-strip {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(45,212,191,.08), transparent 30%),
+    linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.58));
+}
+
+body.light textarea,
+body.light #reportText {
+  background: rgba(255,255,255,.78) !important;
+  color: #172033 !important;
+  border-color: rgba(139,92,246,.18) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.32), 0 18px 55px rgba(139,92,246,.08);
+}
+
+body.light #reportText::placeholder,
+body.light textarea::placeholder {
+  color: #94a3b8;
+}
+
+body.light .quick-card:hover,
+body.light .google-btn:hover,
+body.light .ghost-btn:hover,
+body.light .icon-btn:hover {
+  box-shadow: 0 18px 50px rgba(236,72,153,.14);
+}
+
+.search-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  background: rgba(12,20,36,.72);
+  color: var(--soft);
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+body.light .search-badge {
+  background: rgba(255,255,255,.72);
+  color: #475569;
+  border-color: rgba(139,92,246,.16);
+}
+
+.search-empty-note {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 12px 0;
+}
+
+ 
+/* ================= DASHBOARD STUDIO PRO ================= */
+.dashboard-command-pro {
+  height: 58px;
+  max-width: 760px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 9px 12px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(139,92,246,.26), transparent 34%),
+    radial-gradient(circle at 100% 0%, rgba(236,72,153,.18), transparent 32%),
+    linear-gradient(180deg, rgba(17,27,47,.90), rgba(9,16,30,.86));
+  box-shadow: 0 18px 55px rgba(0,0,0,.20);
+  cursor: pointer;
+  transition: .18s ease;
+  text-align: left;
+}
+
+.dashboard-command-pro:hover {
+  transform: translateY(-1px);
+  border-color: rgba(139,92,246,.48);
+  box-shadow: 0 24px 70px rgba(109,93,252,.18);
+}
+
+.dashboard-command-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  color: white;
+  font-weight: 1000;
+  background: linear-gradient(135deg, var(--purple), var(--purple2), #2dd4bf);
+  box-shadow: 0 14px 34px rgba(139,92,246,.30);
+}
+
+.dashboard-command-copy b {
+  display: block;
+  font-size: 14px;
+  letter-spacing: -.02em;
+}
+
+.dashboard-command-copy small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.dashboard-command-pill {
+  border: 1px solid rgba(139,92,246,.28);
+  background: rgba(139,92,246,.13);
+  color: #ddd6fe;
+  border-radius: 999px;
+  padding: 8px 11px;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.dash-studio-hero {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 20px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(139,92,246,.18), transparent 36%),
+    radial-gradient(circle at 100% 0%, rgba(45,212,191,.12), transparent 35%),
+    linear-gradient(180deg, rgba(17,27,47,.94), rgba(9,16,30,.94));
+  box-shadow: 0 16px 42px rgba(0,0,0,.20);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+}
+
+.dash-studio-hero h3 {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: -.045em;
+}
+
+.dash-studio-hero p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.dash-studio-actions {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.dash-studio-layout {
+  display: grid;
+  grid-template-columns: 340px minmax(0,1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.dash-studio-side {
+  display: grid;
+  gap: 18px;
+}
+
+.dash-studio-panel {
+  background: linear-gradient(180deg, rgba(17,27,47,.94), rgba(9,16,30,.94));
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 14px 38px rgba(0,0,0,.20);
+  min-width: 0;
+}
+
+.dash-studio-panel h3 {
+  margin: 0 0 14px;
+  font-size: 18px;
+  letter-spacing: -.025em;
+}
+
+.dash-preset-list,
+.dash-widget-list {
+  display: grid;
+  gap: 10px;
+}
+
+.dash-preset-pro {
+  border: 1px solid var(--line);
+  background: rgba(8,14,26,.62);
+  color: var(--text);
+  border-radius: 16px;
+  padding: 14px;
+  text-align: left;
+  transition: .16s ease;
+  display: grid;
+  gap: 5px;
+}
+
+.dash-preset-pro:hover,
+.dash-preset-pro.active {
+  transform: translateY(-1px);
+  border-color: rgba(139,92,246,.55);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(139,92,246,.22), transparent 34%),
+    rgba(8,14,26,.72);
+}
+
+.dash-preset-pro b,
+.dash-widget-pro b {
+  display: block;
+  font-size: 13px;
+}
+
+.dash-preset-pro small,
+.dash-widget-pro small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+  margin-top: 3px;
+}
+
+.dash-widget-pro {
+  border: 1px solid var(--line);
+  background: rgba(8,14,26,.56);
+  color: var(--text);
+  border-radius: 15px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.dash-widget-pro button {
+  min-height: 34px;
+  border: 1px solid rgba(139,92,246,.25);
+  background: rgba(139,92,246,.12);
+  color: #ddd6fe;
+  border-radius: 10px;
+  padding: 0 10px;
+  font-weight: 900;
+}
+
+.dash-widget-pro button.active {
+  background: linear-gradient(135deg, var(--purple), var(--purple2));
+  color: white;
+  border: 0;
+}
+
+.dash-canvas-pro {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 14px;
+}
+
+.dash-card-pro {
+  grid-column: span 4;
+  min-height: 165px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 18px;
+  background:
+    radial-gradient(circle at 94% 10%, rgba(139,92,246,.18), transparent 34%),
+    linear-gradient(180deg, rgba(17,27,47,.94), rgba(9,16,30,.94));
+  box-shadow: 0 16px 42px rgba(0,0,0,.20);
+  overflow: hidden;
+  position: relative;
+}
+
+.dash-card-pro.size-m {
+  grid-column: span 6;
+}
+
+.dash-card-pro.size-l {
+  grid-column: span 8;
+  min-height: 240px;
+}
+
+.dash-card-pro.size-xl {
+  grid-column: span 12;
+  min-height: 250px;
+}
+
+.dash-card-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: start;
+  margin-bottom: 14px;
+}
+
+.dash-card-title {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.dash-card-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(139,92,246,.16);
+  color: #c4b5fd;
+  font-weight: 1000;
+}
+
+.dash-card-title h4 {
+  margin: 0;
+  color: var(--soft);
+  font-size: 14px;
+}
+
+.dash-card-title small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.dash-card-tools {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.dash-tool {
+  min-width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  background: rgba(8,14,26,.56);
+  color: var(--soft);
+  border-radius: 9px;
+  font-weight: 900;
+  padding: 0 8px;
+}
+
+.dash-tool:hover {
+  border-color: rgba(139,92,246,.42);
+  color: var(--text);
+}
+
+.dash-big {
+  font-size: 33px;
+  font-weight: 1000;
+  letter-spacing: -.05em;
+}
+
+.dash-muted {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  margin-top: 8px;
+}
+
+.dash-metric-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.dash-metric-mini {
+  border: 1px solid var(--line);
+  background: rgba(8,14,26,.42);
+  border-radius: 13px;
+  padding: 10px;
+}
+
+.dash-metric-mini small {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  margin-bottom: 5px;
+}
+
+.dash-metric-mini b {
+  font-size: 13px;
+}
+
+.dash-list-pro {
+  display: grid;
+  gap: 9px;
+}
+
+.dash-row-pro {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--line);
+  background: rgba(8,14,26,.46);
+  border-radius: 13px;
+  padding: 10px 12px;
+}
+
+.dash-row-pro b {
+  display: block;
+  font-size: 13px;
+}
+
+.dash-row-pro small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.dash-progress {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(148,163,184,.13);
+  overflow: hidden;
+  margin-top: 14px;
+}
+
+.dash-progress span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--purple), var(--cyan), #2dd4bf);
+}
+
+.dash-chart-pro {
+  height: 150px;
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(139,92,246,.12), transparent),
+    repeating-linear-gradient(90deg, transparent 0 54px, rgba(255,255,255,.045) 54px 55px);
+  overflow: hidden;
+  position: relative;
+}
+
+.dash-chart-pro::after {
+  content: "";
+  position: absolute;
+  left: 3%;
+  right: 3%;
+  bottom: 18%;
+  height: 62%;
+  background: linear-gradient(90deg, rgba(34,197,94,.34), rgba(59,130,246,.28), rgba(236,72,153,.34));
+  clip-path: polygon(0 85%, 12% 68%, 24% 74%, 38% 44%, 52% 55%, 67% 24%, 82% 38%, 100% 10%, 100% 100%, 0 100%);
+}
+
+.dash-empty-pro {
+  grid-column: span 12;
+  min-height: 260px;
+  border: 1px dashed var(--line2);
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  text-align: center;
+  padding: 24px;
+}
+
+body.light .dashboard-command-pro,
+body.light .dash-studio-hero,
+body.light .dash-studio-panel,
+body.light .dash-preset-pro,
+body.light .dash-widget-pro,
+body.light .dash-card-pro,
+body.light .dash-row-pro,
+body.light .dash-metric-mini {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(45,212,191,.08), transparent 30%),
+    linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,.60));
+  border-color: rgba(139,92,246,.15);
+  box-shadow: 0 18px 55px rgba(139,92,246,.09);
+}
+
+body.light .dashboard-command-pill,
+body.light .dash-widget-pro button {
+  color: #7c3aed;
+  background: rgba(139,92,246,.10);
+}
+
+body.light .dash-card-pro:nth-child(3n+1) {
+  background:
+    radial-gradient(circle at 94% 10%, rgba(236,72,153,.18), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,255,255,.62));
+}
+
+body.light .dash-card-pro:nth-child(3n+2) {
+  background:
+    radial-gradient(circle at 94% 10%, rgba(45,212,191,.20), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,255,255,.62));
+}
+
+body.light .dash-card-pro:nth-child(3n+3) {
+  background:
+    radial-gradient(circle at 94% 10%, rgba(56,189,248,.20), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,255,255,.62));
+}
+
+body.light .dash-card-icon {
+  background: rgba(139,92,246,.12);
+  color: #7c3aed;
+}
+
+@media (max-width: 1180px) {
+  .dash-studio-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-card-pro,
+  .dash-card-pro.size-m,
+  .dash-card-pro.size-l,
+  .dash-card-pro.size-xl {
+    grid-column: span 12;
+  }
+
+  .dash-studio-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-studio-actions {
+    justify-content: flex-start;
+  }
+}
+
+ 
+/* ================= OPERATION DELETE BUTTONS ================= */
+.operation-delete-btn {
+  min-height: 32px;
+  border: 1px solid rgba(244,63,94,.30);
+  background: rgba(244,63,94,.10);
+  color: #ff9aac;
+  border-radius: 9px;
+  padding: 0 10px;
+  font-weight: 900;
+  margin-left: 8px;
+}
+
+.operation-delete-btn:hover {
+  background: rgba(244,63,94,.18);
+  border-color: rgba(244,63,94,.48);
+}
+
+.operation-actions-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+ 
+/* ================= OPERATION DELETE BUTTONS V3 ================= */
+.operation-delete-btn {
+  min-height: 32px;
+  border: 1px solid rgba(244,63,94,.34);
+  background: rgba(244,63,94,.12);
+  color: #ff9aac;
+  border-radius: 9px;
+  padding: 0 10px;
+  font-weight: 900;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+
+.operation-delete-btn:hover {
+  background: rgba(244,63,94,.20);
+  border-color: rgba(244,63,94,.55);
+}
+
+.operation-actions-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+
+
+/* ================= TELEGRAM FLOATING BOT BUTTON ================= */
+.telegram-float-btn {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 99998;
+  width: 62px;
+  height: 62px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  color: #fff;
+  background: linear-gradient(135deg, #229ED9, #38bdf8, #8b5cf6);
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 22px 55px rgba(34,158,217,.34), 0 12px 34px rgba(139,92,246,.22);
+  transition: .18s ease;
+}
+
+.telegram-float-btn:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 28px 70px rgba(34,158,217,.42), 0 16px 44px rgba(139,92,246,.28);
+}
+
+.telegram-float-btn svg {
+  width: 31px;
+  height: 31px;
+  display: block;
+}
+
+.telegram-float-label {
+  position: fixed;
+  right: 94px;
+  bottom: 31px;
+  z-index: 99997;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(12,20,36,.88);
+  color: var(--text);
+  box-shadow: 0 16px 40px rgba(0,0,0,.24);
+  backdrop-filter: blur(16px);
+  font-size: 13px;
+  font-weight: 900;
+  pointer-events: none;
+}
+
+body.light .telegram-float-label {
+  background: rgba(255,255,255,.86);
+  color: #172033;
+  border-color: rgba(139,92,246,.16);
+}
+
+.telegram-float-btn.telegram-connected {
+  width: 56px;
+  height: 56px;
+  right: 22px;
+  bottom: 22px;
+}
+
+.telegram-float-btn.telegram-connected + .telegram-float-label {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .telegram-float-btn {
+    right: 16px;
+    bottom: 16px;
+    width: 56px;
+    height: 56px;
+  }
+
+  .telegram-float-label {
+    display: none;
+  }
+}
+
+ 
+/* ================= TELEGRAM WEBAPP MODE FIX ================= */
+.telegram-webapp-notice {
+  border: 1px solid rgba(34,158,217,.24);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(34,158,217,.16), transparent 34%),
+    linear-gradient(180deg, rgba(12,20,36,.92), rgba(8,15,28,.88));
+  color: var(--text);
+  border-radius: 16px;
+  padding: 13px 15px;
+  margin: -6px 0 18px;
+  display: grid;
+  gap: 4px;
+  box-shadow: 0 16px 38px rgba(0,0,0,.18);
+}
+
+.telegram-webapp-notice b {
+  font-size: 13px;
+}
+
+.telegram-webapp-notice span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+body.light .telegram-webapp-notice {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(34,158,217,.12), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,.64));
+  border-color: rgba(34,158,217,.18);
+}
+
+
+  .telegram-login-widget {
+   min-height: 42px;
+   display: flex;
+   align-items: center;
+  }
+  .telegram-login-widget iframe {
+   border-radius: 10px;
+  }
+
+
+/* ================= FINAL UI FIXES BY DIMA ================= */
+.topbar {
+  height: auto;
+  min-height: 58px;
+  grid-template-columns: minmax(420px, 1fr) auto;
+  align-items: start;
+}
+
+.top-actions {
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.google-btn,
+.ghost-btn,
+.telegram-login-widget {
+  flex: 0 0 auto;
+}
+
+.user-card {
+  max-width: 220px;
+  min-width: 180px;
+}
+
+.user-card b,
+.user-card small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 145px;
+}
+
+.telegram-login-widget.telegram-hidden {
+  display: none !important;
+}
+
+.premium {
+  display: none !important;
+}
+
+.sidebar {
+  gap: 16px;
+}
+
+.version {
+  margin-top: auto;
+}
+
+.sheet {
+  font-size: clamp(10px, 0.58vw, 12px);
+  color: #edf4ff;
+}
+
+.sheet th,
+.sheet td {
+  border-color: rgba(226,232,240,.18);
+  height: 32px;
+}
+
+.sheet th {
+  color: #d8e3f8;
+  background: rgba(20,31,54,.98);
+}
+
+.sheet .row-num {
+  color: #c4d0e7;
+  background: rgba(8,16,31,.98);
+}
+
+.sheet .label-cell {
+  color: #ffffff;
+}
+
+.sheet input {
+  color: #f8fbff;
+  font-weight: 750;
+}
+
+body.light {
+  --bg: #fff3f8;
+  --sidebar: rgba(255,244,250,.86);
+  --card: rgba(255,248,252,.84);
+  --card2: rgba(255,241,248,.74);
+  --line: rgba(190, 91, 138, .18);
+  --line2: rgba(190, 91, 138, .30);
+  --text: #251625;
+  --muted: #735d6d;
+  --soft: #3f2e3f;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(244,114,182,.20), transparent 34%),
+    radial-gradient(circle at 86% 7%, rgba(216,180,254,.22), transparent 31%),
+    linear-gradient(135deg, #fff7fb 0%, #fff0f7 45%, #f8ecff 100%);
+}
+
+body.light .main {
+  background:
+    radial-gradient(circle at 26% 0%, rgba(244,114,182,.08), transparent 36%),
+    radial-gradient(circle at 92% 16%, rgba(192,132,252,.08), transparent 34%);
+}
+
+body.light .sidebar {
+  background: linear-gradient(180deg, rgba(255,247,251,.92), rgba(255,237,246,.88));
+  border-right-color: rgba(190,91,138,.16);
+}
+
+body.light .card,
+body.light .panel,
+body.light .table-shell,
+body.light .user-card,
+body.light .search,
+body.light .icon-btn,
+body.light .google-btn,
+body.light .ghost-btn,
+body.light .quick-card,
+body.light .recent-item,
+body.light .module-item,
+body.light .section-kpi .kpi {
+  background: linear-gradient(180deg, rgba(255,250,253,.88), rgba(255,242,249,.76));
+  border-color: rgba(190,91,138,.18);
+  box-shadow: 0 18px 52px rgba(190,91,138,.10);
+}
+
+body.light .sheet {
+  color: #2a1830;
+  font-size: clamp(10px, 0.60vw, 12px);
+}
+
+body.light .sheet th {
+  background: #fff1f7;
+  color: #56364f;
+}
+
+body.light .sheet th,
+body.light .sheet td {
+  border-color: rgba(134,74,110,.26);
+}
+
+body.light .sheet .row-num {
+  background: #fff5fa;
+  color: #6d5369;
+}
+
+body.light .sheet .label-cell {
+  background: rgba(255,248,252,.86);
+  color: #2a1830;
+}
+
+body.light .sheet input {
+  color: #2a1830;
+  font-weight: 750;
+}
+
+body.light .sheet .life { background: rgba(125, 191, 255, .24); }
+body.light .sheet .fun { background: rgba(244, 114, 182, .22); }
+body.light .sheet .future { background: rgba(134, 239, 172, .22); }
+
+@media (max-width: 1180px) {
+  .topbar { grid-template-columns: 1fr; }
+  .top-actions { justify-content: flex-start; overflow-x: auto; padding-bottom: 4px; }
+}
+
+
+/* ================= FINAL CENTER + SOFT PINK FIX V2 ================= */
+button,
+.icon-btn,
+.google-btn,
+.purple-btn,
+.ghost-btn,
+.danger-btn,
+.dash-tool,
+.dash-widget-pro button,
+.dash-studio-actions button,
+.operation-delete-btn,
+.premium button,
+.nav button,
+.type-toggle button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+}
+
+.icon-btn,
+.google-btn,
+.ghost-btn,
+.purple-btn,
+.danger-btn {
+  height: 42px !important;
+  min-height: 42px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.google-btn {
+  width: 46px !important;
+  min-width: 46px !important;
+  max-width: 46px !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  font-size: 0 !important;
+  border-radius: 13px !important;
+}
+
+.google-btn .google-icon {
+  font-size: 19px !important;
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.topbar {
+  align-items: center !important;
+}
+
+.top-actions {
+  align-items: center !important;
+}
+
+.dashboard-command-pro {
+  align-items: center !important;
+}
+
+.dash-card-head {
+  align-items: center !important;
+}
+
+.dash-card-tools {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+}
+
+.dash-tool {
+  width: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+}
+
+.dash-widget-pro {
+  align-items: center !important;
+}
+
+.dash-widget-pro button {
+  width: 42px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 !important;
+  border-radius: 13px !important;
+  font-size: 20px !important;
+  line-height: 1 !important;
+}
+
+.telegram-float-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+.telegram-float-btn svg {
+  width: 30px !important;
+  height: 30px !important;
+  display: block !important;
+  margin: 0 !important;
+  transform: translate(-1px, 1px) !important;
+}
+
+body.light {
+  --bg: #f7edf3 !important;
+  --sidebar: rgba(250, 238, 246, .92) !important;
+  --card: rgba(255, 248, 252, .82) !important;
+  --card2: rgba(250, 240, 247, .76) !important;
+  --line: rgba(151, 91, 123, .18) !important;
+  --line2: rgba(151, 91, 123, .30) !important;
+  --text: #241724 !important;
+  --muted: #755f6f !important;
+  --soft: #443340 !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(230, 134, 176, .16), transparent 35%),
+    radial-gradient(circle at 86% 4%, rgba(190, 166, 225, .16), transparent 34%),
+    radial-gradient(circle at 50% 95%, rgba(242, 195, 215, .20), transparent 42%),
+    linear-gradient(135deg, #f8eef4 0%, #f5e9f1 46%, #f1e8f5 100%) !important;
+}
+
+body.light .main {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(230, 134, 176, .07), transparent 36%),
+    radial-gradient(circle at 88% 18%, rgba(190, 166, 225, .08), transparent 36%) !important;
+}
+
+body.light .sidebar {
+  background: linear-gradient(180deg, rgba(251, 241, 247, .94), rgba(246, 232, 241, .90)) !important;
+  border-right-color: rgba(151,91,123,.14) !important;
+}
+
+body.light .card,
+body.light .panel,
+body.light .table-shell,
+body.light .dash-studio-panel,
+body.light .dash-card-pro,
+body.light .dash-preset-pro,
+body.light .dash-widget-pro,
+body.light .user-card,
+body.light .search,
+body.light .icon-btn,
+body.light .google-btn,
+body.light .ghost-btn,
+body.light .quick-card,
+body.light .recent-item,
+body.light .module-item,
+body.light .section-kpi .kpi {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(229, 175, 205, .10), transparent 36%),
+    linear-gradient(180deg, rgba(255, 250, 253, .78), rgba(250, 240, 247, .68)) !important;
+  border-color: rgba(151,91,123,.17) !important;
+  box-shadow: 0 16px 46px rgba(151,91,123,.08) !important;
+}
+
+body.light .dash-card-pro {
+  color: #241724 !important;
+}
+
+body.light .dash-tool,
+body.light .dash-widget-pro button {
+  background: rgba(83, 72, 96, .72) !important;
+  color: #fff !important;
+  border-color: rgba(83, 72, 96, .18) !important;
+}
+
+body.light .dash-widget-pro button.active,
+body.light .purple-btn,
+body.light .nav button:hover,
+body.light .nav button.active,
+body.light .logo {
+  background: linear-gradient(135deg, #8b5cf6 0%, #d85b9f 58%, #55c5bd 100%) !important;
+}
+
+body.light .sheet {
+  color: #281b2a !important;
+  font-size: clamp(11px, 0.64vw, 13px) !important;
+}
+
+body.light .sheet th,
+body.light .sheet td {
+  border-color: rgba(91, 62, 83, .30) !important;
+}
+
+body.light .sheet th {
+  background: #f5e6ee !important;
+  color: #4f344a !important;
+  font-weight: 900 !important;
+}
+
+body.light .sheet .row-num {
+  background: #f7edf3 !important;
+  color: #654d61 !important;
+}
+
+body.light .sheet .label-cell {
+  background: rgba(255, 247, 251, .88) !important;
+  color: #281b2a !important;
+  font-weight: 900 !important;
+}
+
+body.light .sheet input {
+  color: #281b2a !important;
+  font-weight: 850 !important;
+}
+
+body.light .sheet .life { background: rgba(154, 197, 235, .28) !important; }
+body.light .sheet .fun { background: rgba(221, 132, 176, .26) !important; }
+body.light .sheet .future { background: rgba(153, 212, 178, .26) !important; }
+
+body.light .telegram-float-label {
+  background: rgba(255, 250, 253, .88) !important;
+  color: #241724 !important;
+  border-color: rgba(151,91,123,.18) !important;
+}
+
+ 
+
+/* ===== FINAL TOPBAR + TELEGRAM POPUP FIX ===== */
+.topbar {
+  grid-template-columns: minmax(620px, 1fr) auto !important;
+  gap: 24px !important;
+  align-items: center !important;
+}
+
+.dashboard-command-pro {
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 66px !important;
+  height: 66px !important;
+  padding: 12px 18px !important;
+  border-radius: 22px !important;
+  grid-template-columns: 48px minmax(0,1fr) auto !important;
+  gap: 14px !important;
+  overflow: hidden !important;
+}
+
+.dashboard-command-mark {
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 17px !important;
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 auto !important;
+}
+
+.dashboard-command-copy {
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.dashboard-command-copy b,
+.dashboard-command-copy small {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.dashboard-command-pill {
+  align-self: center !important;
+  justify-self: end !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 34px !important;
+}
+
+.top-actions,
+.head-actions,
+.dash-studio-actions,
+.toolbar-group,
+.action-grid button,
+.widget-action,
+.icon-btn,
+.google-btn,
+.ghost-btn,
+.purple-btn,
+.danger-btn {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.telegram-float-btn {
+  display: grid !important;
+  place-items: center !important;
+}
+
+.telegram-float-btn svg {
+  display: block !important;
+  margin: 0 !important;
+  transform: translateX(-1px) !important;
+}
+
+.telegram-float-label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  min-width: 310px !important;
+  max-width: 380px !important;
+  min-height: 84px !important;
+  border-radius: 22px !important;
+  right: 96px !important;
+  bottom: 22px !important;
+  padding: 16px 18px !important;
+  font-size: 14px !important;
+  line-height: 1.35 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transform: translateY(16px) scale(.96) !important;
+  transition: opacity .28s ease, transform .28s ease, visibility .28s ease !important;
+}
+
+.telegram-float-label::before {
+  content: "Telegram";
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 800;
+  margin-bottom: 3px;
+}
+
+.telegram-float-label.telegram-pop {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) scale(1) !important;
+}
+
+.telegram-float-btn.telegram-connected,
+.telegram-float-btn.telegram-connected + .telegram-float-label {
+  display: none !important;
+}
+
+body.light .telegram-float-label {
+  background: rgba(255, 250, 253, .94) !important;
+  color: #211622 !important;
+  border-color: rgba(214, 138, 182, .24) !important;
+  box-shadow: 0 18px 46px rgba(121, 61, 95, .14) !important;
+}
+
+body.light {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 187, 217, .42), transparent 34%),
+    radial-gradient(circle at 80% 4%, rgba(202, 232, 255, .36), transparent 31%),
+    linear-gradient(180deg, #fff7fb, #f7eaf3 52%, #f1e4ef) !important;
+}
+
+@media (max-width: 1180px) {
+  .topbar {
+    grid-template-columns: 1fr !important;
+  }
+  .top-actions {
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard-command-pro {
+    min-height: 62px !important;
+    height: auto !important;
+    grid-template-columns: 44px minmax(0,1fr) !important;
+  }
+  .dashboard-command-pill {
+    display: none !important;
+  }
+  .telegram-float-label {
+    right: 16px !important;
+    left: 16px !important;
+    bottom: 84px !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+}
+
+
+
+/* ================= FINAL POLISH: sidebar + header + Telegram popup ================= */
+body.light {
+  --bg: #f8edf3 !important;
+  --sidebar: rgba(255, 243, 249, .88) !important;
+  --card: rgba(255, 250, 253, .78) !important;
+  --card2: rgba(255, 247, 251, .68) !important;
+  --line: rgba(168, 92, 132, .14) !important;
+  --line2: rgba(168, 92, 132, .24) !important;
+  --text: #201524 !important;
+  --muted: #756475 !important;
+  --soft: #50465b !important;
+}
+body.light {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(236, 72, 153, .11), transparent 31%),
+    radial-gradient(circle at 76% 7%, rgba(125, 211, 252, .12), transparent 28%),
+    linear-gradient(135deg, #fff7fb 0%, #f8edf3 45%, #f3e9f8 100%) !important;
+}
+body.light .sidebar {
+  background:
+    radial-gradient(circle at 28% 8%, rgba(236, 72, 153, .09), transparent 34%),
+    linear-gradient(180deg, rgba(255,247,252,.94), rgba(250,236,244,.9)) !important;
+  border-right: 1px solid rgba(168,92,132,.12) !important;
+}
+.sidebar {
+  padding: 28px 18px 22px !important;
+  gap: 28px !important;
+}
+.brand {
+  padding: 0 6px 10px !important;
+  gap: 14px !important;
+}
+.logo {
+  width: 44px !important;
+  height: 44px !important;
+  box-shadow: 0 18px 44px rgba(236,72,153,.22) !important;
+}
+.nav {
+  gap: 10px !important;
+}
+.nav button {
+  min-height: 48px !important;
+  padding: 0 17px !important;
+  border-radius: 15px !important;
+  display: grid !important;
+  grid-template-columns: 26px 1fr !important;
+  align-items: center !important;
+  justify-items: start !important;
+  font-size: 15px !important;
+  letter-spacing: -.01em !important;
+}
+.nav span:first-child {
+  width: 26px !important;
+  height: 26px !important;
+  display: grid !important;
+  place-items: center !important;
+  opacity: .92 !important;
+}
+.nav button.active {
+  background: linear-gradient(135deg, #a855f7 0%, #ec4899 48%, #5eead4 100%) !important;
+  box-shadow: 0 18px 36px rgba(236,72,153,.18) !important;
+}
+.version {
+  margin-top: auto !important;
+  padding-left: 6px !important;
+  font-size: 12px !important;
+  opacity: .72 !important;
+}
+.premium,
+.info-box:has(+ .premium),
+.info-box.account-active,
+.account-active,
+#accountActive,
+[data-account-active] {
+  display: none !important;
+}
+.topbar {
+  grid-template-columns: minmax(560px, 900px) auto !important;
+  align-items: center !important;
+  gap: 18px !important;
+}
+.dashboard-command-pro {
+  width: min(900px, 100%) !important;
+  min-height: 64px !important;
+  height: auto !important;
+  padding: 12px 18px !important;
+  display: grid !important;
+  grid-template-columns: 50px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 14px !important;
+  border-radius: 22px !important;
+}
+.dashboard-command-mark {
+  width: 46px !important;
+  height: 46px !important;
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 46px !important;
+}
+.dashboard-command-copy {
+  min-width: 0 !important;
+  text-align: left !important;
+  display: grid !important;
+  gap: 4px !important;
+}
+.dashboard-command-copy b,
+.dashboard-command-copy small {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.dashboard-command-pill {
+  align-self: center !important;
+  justify-self: end !important;
+}
+button, .icon-btn, .google-btn, .purple-btn, .ghost-btn, .danger-btn, .quick-btn, .dashboard-widget-controls button, .library-item button, .telegram-login-widget {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}
+.google-btn {
+  width: 48px !important;
+  min-width: 48px !important;
+  height: 48px !important;
+  padding: 0 !important;
+}
+.google-icon {
+  display: grid !important;
+  place-items: center !important;
+  line-height: 1 !important;
+}
+.telegram-float-btn {
+  width: 56px !important;
+  height: 56px !important;
+  right: 24px !important;
+  bottom: 24px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+}
+.telegram-float-btn svg {
+  width: 29px !important;
+  height: 29px !important;
+  display: block !important;
+  margin: 0 !important;
+  transform: translateX(-1px) !important;
+}
+.telegram-float-label {
+  right: 94px !important;
+  bottom: 22px !important;
+  width: 270px !important;
+  min-height: 88px !important;
+  padding: 16px 18px !important;
+  border-radius: 20px !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+  box-shadow: 0 22px 60px rgba(72, 42, 80, .18) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(18px) scale(.96) !important;
+  transition: opacity .25s ease, transform .25s ease !important;
+}
+.telegram-float-label strong {
+  font-size: 14px !important;
+  margin: 0 0 6px !important;
+}
+.telegram-float-label span {
+  font-size: 12.5px !important;
+}
+.telegram-float-label.telegram-pop {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translateY(0) scale(1) !important;
+}
+.telegram-float-label.telegram-connected,
+.telegram-float-btn.telegram-connected,
+body.telegram-bot-used .telegram-float-label,
+body.telegram-bot-used .telegram-float-btn {
+  display: none !important;
+}
+@media (max-width: 1100px) {
+  .topbar { grid-template-columns: 1fr !important; }
+  .dashboard-command-pro { width: 100% !important; }
+  .top-actions { justify-content: flex-start !important; }
+}
+@media (max-width: 760px) {
+  .telegram-float-label { right: 18px !important; bottom: 88px !important; width: min(300px, calc(100vw - 36px)) !important; }
+}
+
+</style>
+
+<style id="username-only-polish">
+.user-card {
+  align-items: center !important;
+}
+.user-card > div:last-child {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 38px !important;
+}
+.user-card small,
+#userEmail {
+  display: none !important;
+}
+.user-card b,
+#userName {
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+</style>
+
+
+
+<style id="final-dashboard-wide-popup-v2">
+/* FINAL FIX: Dashboard Studio нормальной ширины, не сплющенный */
+.topbar {
+  display: grid !important;
+  grid-template-columns: minmax(520px, 780px) minmax(0, 1fr) !important;
+  gap: 22px !important;
+  align-items: center !important;
+  min-height: 76px !important;
+  height: auto !important;
+}
+
+.dashboard-command-pro {
+  width: 100% !important;
+  max-width: 780px !important;
+  min-width: 520px !important;
+  height: 64px !important;
+  min-height: 64px !important;
+  padding: 10px 16px !important;
+  border-radius: 22px !important;
+  display: grid !important;
+  grid-template-columns: 46px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 14px !important;
+  justify-self: start !important;
+  overflow: hidden !important;
+}
+
+.dashboard-command-mark {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  border-radius: 16px !important;
+  display: grid !important;
+  place-items: center !important;
+  line-height: 1 !important;
+}
+
+.dashboard-command-copy {
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  gap: 3px !important;
+}
+
+.dashboard-command-copy b {
+  font-size: 14px !important;
+  line-height: 1.18 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.dashboard-command-copy small {
+  font-size: 12px !important;
+  line-height: 1.25 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.dashboard-command-pill {
+  height: 32px !important;
+  min-width: 74px !important;
+  padding: 0 14px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}
+
+.top-actions {
+  justify-self: end !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  min-width: 0 !important;
+}
+
+.icon-btn,
+.google-btn,
+.ghost-btn,
+.purple-btn,
+.danger-btn,
+.quick-card,
+.action-grid button,
+.dash-tool,
+.dash-widget-pro button,
+.widget-action {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  line-height: 1.1 !important;
+}
+
+.google-btn {
+  width: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  padding: 0 !important;
+}
+.google-btn .google-icon {
+  margin: 0 !important;
+}
+
+/* FINAL FIX: Telegram снизу — только круглая кнопка, подсказка всплывает периодически */
+.telegram-float-btn {
+  position: fixed !important;
+  right: 22px !important;
+  bottom: 22px !important;
+  width: 62px !important;
+  height: 62px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  z-index: 99998 !important;
+}
+.telegram-float-btn svg {
+  width: 31px !important;
+  height: 31px !important;
+  display: block !important;
+  margin: 0 !important;
+  transform: translateX(-1px) !important;
+}
+
+.telegram-float-label {
+  position: fixed !important;
+  right: 96px !important;
+  bottom: 20px !important;
+  z-index: 99997 !important;
+  width: 360px !important;
+  min-height: 96px !important;
+  padding: 18px 18px 18px 20px !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(139,92,246,.18) !important;
+  background: rgba(255,250,253,.94) !important;
+  color: #211622 !important;
+  box-shadow: 0 22px 70px rgba(98,49,78,.18), 0 8px 24px rgba(0,0,0,.08) !important;
+  backdrop-filter: blur(18px) !important;
+  display: grid !important;
+  grid-template-columns: 1fr auto !important;
+  align-items: center !important;
+  gap: 14px !important;
+  pointer-events: auto !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateY(18px) scale(.96) !important;
+  transition: opacity .28s ease, transform .28s ease, visibility .28s ease !important;
+}
+.telegram-float-label strong {
+  display: block !important;
+  font-size: 15px !important;
+  line-height: 1.2 !important;
+  margin-bottom: 7px !important;
+}
+.telegram-float-label span {
+  display: block !important;
+  color: #6b5a66 !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  font-weight: 700 !important;
+}
+.telegram-float-label::before {
+  content: none !important;
+}
+.telegram-float-label::after {
+  content: "↗" !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 999px !important;
+  display: grid !important;
+  place-items: center !important;
+  color: #fff !important;
+  background: linear-gradient(135deg, #229ED9, #38bdf8, #8b5cf6) !important;
+  font-size: 20px !important;
+  font-weight: 900 !important;
+}
+.telegram-float-label.telegram-pop {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) scale(1) !important;
+}
+.telegram-float-btn.telegram-connected,
+.telegram-float-btn.telegram-connected + .telegram-float-label,
+.telegram-float-label.telegram-connected {
+  display: none !important;
+}
+
+body.light {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(246, 187, 216, .30), transparent 34%),
+    radial-gradient(circle at 83% 5%, rgba(206, 233, 255, .28), transparent 32%),
+    linear-gradient(180deg, #fff8fc 0%, #f8edf4 48%, #f3e7f0 100%) !important;
+}
+
+@media (max-width: 1180px) {
+  .topbar {
+    grid-template-columns: 1fr !important;
+  }
+  .dashboard-command-pro {
+    min-width: 0 !important;
+    max-width: 780px !important;
+  }
+  .top-actions {
+    justify-self: start !important;
+    flex-wrap: wrap !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard-command-pro {
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 62px !important;
+    grid-template-columns: 44px minmax(0,1fr) !important;
+  }
+  .dashboard-command-pill {
+    display: none !important;
+  }
+  .telegram-float-btn {
+    right: 16px !important;
+    bottom: 16px !important;
+    width: 58px !important;
+    height: 58px !important;
+  }
+  .telegram-float-label {
+    right: 16px !important;
+    left: 16px !important;
+    bottom: 86px !important;
+    width: auto !important;
+  }
+}
+</style>
+
+</head>
+<body>
+ <div class="app">
+  <aside class="sidebar">
+   <div class="brand">
+    <div class="logo">◆</div>
+    <h1>FinCenter</h1>
+   </div>
+
+   <nav class="nav" id="nav">
+    <button class="active" data-view="dashboard"><span>⌂</span><span>Главная</span></button>
+    <button data-view="operations"><span>⇄</span><span>Операции</span></button>
+    <button data-view="table"><span>▦</span><span>Таблица</span></button>
+    <button data-view="analytics"><span>◌</span><span>Аналитика</span></button>
+    <button data-view="dashboards"><span>✦</span><span>Dashboards</span></button>
+    <button data-view="budgets"><span>▣</span><span>Бюджеты</span></button>
+    <button data-view="goals"><span>◎</span><span>Цели</span></button>
+    <button data-view="subs"><span>▤</span><span>Подписки</span></button>
+    <button data-view="debts"><span>◇</span><span>Долги</span></button>
+    <button data-view="invest"><span>⌁</span><span>Инвестиции</span></button>
+    <button data-view="reports"><span>▧</span><span>Отчёты</span></button>
+    <button data-view="settings"><span>⚙</span><span>Настройки</span></button>
+   </nav>
+
+   <div class="version">© 2026 FinCenter By Dima</div>
+    </aside>
+
+  <main class="main">
+   <header class="topbar">
+    <button class="dashboard-command-pro" id="dashboardCommandBtn" type="button">
+     <span class="dashboard-command-mark">✦</span>
+     <span class="dashboard-command-copy">
+      <b>Dashboard Studio</b>
+      <small>Открой конструктор виджетов и собери главную под себя</small>
+     </span>
+     <span class="dashboard-command-pill" id="dashboardCommandPreset">Aurora</span>
+    </button>
+
+    <div class="top-actions">
+     <button class="icon-btn" id="themeBtn">☾</button>
+     <button class="icon-btn" id="notifyBtn">🔔</button>
+     <button class="google-btn" id="googleBtn" title="Войти через Google" aria-label="Войти через Google"><span class="google-icon">G</span></button>
+   <div class="telegram-login-widget" id="telegramLoginWidget"></div>
+     <button class="ghost-btn" id="logoutBtn" style="display:none">Выйти</button>
+     <div class="user-card" id="userCard" style="display:none">
+      <div class="avatar" id="avatar">U</div>
+      <div>
+       <b id="userName">Demo User</b>
+      </div>
+     </div>
+    </div>
+   </header>
+
+   <section class="view active" id="dashboard">
+    <div class="page-head">
+     <div>
+      <h2>Главная</h2>
+      <p>Финансовая сводка, последние операции и быстрый доступ к главным инструментам.</p>
+     </div>
+    </div>
+
+    <div class="cards">
+     <div class="card">
+      <div class="card-title">Общий баланс</div>
+      <div class="card-value" id="balance">0.00 ₸</div>
+      <div class="card-sub"><span class="positive" id="balanceGrowth">+0%</span> за этот месяц</div>
+      <canvas class="spark" id="balanceSpark" width="160" height="60"></canvas>
+     </div>
+
+     <div class="card">
+      <div class="metric-icon green">↟</div>
+      <div class="card-title">Доходы</div>
+      <div class="card-value" id="income">0.00 ₸</div>
+      <div class="card-sub positive" id="incomePct">0%</div>
+      <canvas class="spark" id="incomeSpark" width="160" height="60"></canvas>
+     </div>
+
+     <div class="card">
+      <div class="metric-icon red">↡</div>
+      <div class="card-title">Расходы</div>
+      <div class="card-value" id="expense">0.00 ₸</div>
+      <div class="card-sub negative" id="expensePct">0%</div>
+      <canvas class="spark" id="expenseSpark" width="160" height="60"></canvas>
+     </div>
+
+     <div class="card">
+      <div class="metric-icon blue">◎</div>
+      <div class="card-title">Цели</div>
+      <div class="card-value" id="goalsCard">0 из 0</div>
+      <div class="card-sub"><span class="cyan" id="goalsPct">0%</span> выполнено</div>
+      <canvas class="spark" id="goalsSpark" width="160" height="60"></canvas>
+     </div>
+    </div>
+
+    <div class="grid2">
+     <div class="panel">
+      <h3>Последние операции</h3>
+      <div class="recent-list" id="dashboardRecent"></div>
+     </div>
+
+     <div class="panel">
+      <h3>Быстрые действия</h3>
+      <div class="quick-actions">
+       <button class="quick-card" data-go="operations">＋<br />Добавить операцию</button>
+       <button class="quick-card" data-go="table">▦<br />Открыть таблицу</button>
+       <button class="quick-card" data-go="analytics">◌<br />Аналитика</button>
+       <button class="quick-card" data-go="settings">⚙<br />Настройки</button>
+      </div>
+     </div>
+    </div>
+
+    <div class="footer-strip">
+     <div class="footer-item"><div class="footer-icon">🛡</div><div><b>Изоляция данных</b><small>Каждый аккаунт хранит свои данные</small></div></div>
+     <div class="footer-item"><div class="footer-icon">☁</div><div><b>Cloud save</b><small>Данные уже в облаке</small></div></div>
+     <div class="footer-item"><div class="footer-icon">▣</div><div><b>Автосохранение</b><small>Синхронизация после изменений</small></div></div>
+     <div class="footer-item"><div class="footer-icon">⇩</div><div><b>Экспорт</b><small>JSON и CSV</small></div></div>
+    </div>
+   </section>
+
+   <section class="view" id="operations">
+    <div class="page-head">
+     <div>
+      <h2>Операции</h2>
+      <p>Добавляй доходы и расходы вручную или через быстрый ввод — история сразу обновится в облаке.</p>
+     </div>
+     <div class="head-actions">
+      <button class="ghost-btn" id="opsExportBtn">⇧ CSV</button>
+     </div>
+    </div>
+
+    <div class="grid2">
+     <div class="panel">
+      <h3>Добавить операцию</h3>
+      <div class="form-grid">
+       <div class="field">
+        <label>Сумма</label>
+        <input id="amountInput" type="number" placeholder="-2500" />
+       </div>
+
+       <div class="field">
+        <label>Валюта</label>
+        <select id="operationCurrency">
+         <option>₸ KZT</option>
+         <option>$ USD</option>
+         <option>€ EUR</option>
+         <option>₽ RUB</option>
+        </select>
+       </div>
+
+       <div class="field">
+        <label>Категория</label>
+        <select id="categoryInput"></select>
+       </div>
+
+       <div class="field">
+        <label>Дата</label>
+        <input id="dateInput" type="date" />
+       </div>
+
+       <div class="field full">
+        <label>Тип операции</label>
+        <div class="type-toggle">
+         <button id="expenseType" class="active-expense">Расход</button>
+         <button id="incomeType">Доход</button>
+        </div>
+       </div>
+
+       <div class="field full">
+        <label>Быстрый ввод / описание</label>
+        <input id="descInput" placeholder="Например: -2500 Развлечения" />
+       </div>
+
+       <div class="field full">
+        <button class="purple-btn" id="addOperationBtn">▣ Добавить операцию</button>
+       </div>
+      </div>
+     </div>
+
+     <div class="panel">
+      <h3>История операций</h3>
+      <div class="recent-list" id="operationsList"></div>
+     </div>
+    </div>
+   </section>
+
+   <section class="view" id="table">
+    <div class="page-head">
+     <div>
+      <h2>Таблица учёта</h2>
+      <p>Гибкая таблица учёта с личными пунктами, фондами, процентами и автосохранением.</p>
+     </div>
+
+     <div class="head-actions">
+      <button class="ghost-btn" id="importBtn">⇩ Импорт</button>
+      <button class="ghost-btn" id="exportBtn">⇧ Экспорт JSON</button>
+      <button class="ghost-btn" id="exportCsvBtn">⇧ CSV</button>
+      <button class="danger-btn" id="resetTableBtn">⟲ Сбросить</button>
+     </div>
+    </div>
+
+    <div class="table-shell">
+     <div class="table-tabs" id="tableTabs">
+      <button class="tab active" data-table-tab="sheet">▦ Таблица</button>
+      <button class="tab" data-table-tab="settings">⚙ Настройки таблицы</button>
+      <button class="tab" data-table-tab="history">↺ История изменений</button>
+     </div>
+
+     <div class="table-tab-content active" id="tableTabSheet">
+      <div class="table-toolbar">
+       <div class="toolbar-group">
+        <span class="mini-label">Валюта:</span>
+        <select class="select" id="currencySelect"></select>
+        <span class="mini-label">Режим:</span>
+        <select class="select" id="fitMode">
+         <option value="fit">Вместить 100%</option>
+         <option value="scroll">Горизонтальный скролл</option>
+        </select>
+        <span class="mini-label">UID:</span>
+        <span class="mini-label" id="uidLabel">—</span>
+       </div>
+
+       
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+  <button class="ghost-btn" id="addCustomColumnBtn" type="button">＋ Добавить свой пункт</button>
+  <button class="ghost-btn" id="clearSheetOnlyBtn" type="button">⌫ Очистить только таблицу</button>
+  <button class="purple-btn" id="addEmptyRowBtn">＋ Строки уже готовы</button>
+</div>
+
+      </div>
+
+      <div class="sheet-wrap" id="sheetWrap">
+       <table class="sheet" id="financeSheet"></table>
+      </div>
+     </div>
+
+     <div class="table-tab-content" id="tableTabSettings">
+      <div class="panel" style="margin:18px">
+       <h3>Настройки таблицы</h3>
+       <div class="form-grid">
+        <div class="field">
+         <label>Валюта таблицы</label>
+         <select id="settingsCurrencySelect"></select>
+        </div>
+        <div class="field">
+         <label>Режим отображения</label>
+         <select id="settingsFitMode">
+          <option value="fit">Вместить 100%</option>
+          <option value="scroll">Горизонтальный скролл</option>
+         </select>
+        </div>
+        <div class="field">
+         <label>Высота таблицы</label>
+         <select id="settingsTableHeight">
+          <option value="compact">Компактная</option>
+          <option value="normal" selected>Обычная</option>
+          <option value="large">Большая</option>
+         </select>
+        </div>
+        <div class="field">
+         <label>Автосохранение</label>
+         <select id="settingsAutosave">
+          <option value="on" selected>Включено</option>
+          <option value="off">Выключено</option>
+         </select>
+        </div>
+        <div class="field full">
+         <button class="purple-btn" id="saveTableSettingsBtn">Сохранить настройки таблицы</button>
+        </div>
+        <div class="field full">
+         <button class="danger-btn" id="clearHistoryBtn">Очистить историю изменений</button>
+        </div>
+       </div>
+      </div>
+     </div>
+
+     <div class="table-tab-content" id="tableTabHistory">
+      <div class="panel" style="margin:18px">
+       <h3>История изменений</h3>
+       <div class="recent-list" id="historyList"></div>
+      </div>
+     </div>
+    </div>
+   </section>
+
+   <section class="view" id="analytics">
+    <div class="page-head">
+     <div>
+      <h2>Аналитика</h2>
+      <p>Наглядная аналитика по расходам, категориям и финансовой динамике.</p>
+     </div>
+    </div>
+
+    <div class="grid2">
+     <div class="panel chart-card">
+      <h3>Расходы по категориям</h3>
+      <div class="donut-row">
+       <canvas id="donutChart" width="230" height="230"></canvas>
+       <div class="legend" id="legend"></div>
+      </div>
+     </div>
+
+     <div class="panel chart-card">
+      <h3>Динамика расходов</h3>
+      <canvas id="lineChart" width="620" height="260"></canvas>
+     </div>
+    </div>
+   </section>
+
+   <section class="view" id="budgets">
+    <div class="page-head">
+     <div>
+      <h2>Бюджеты</h2>
+      <p>Задавай лимиты по категориям и следи, сколько уже потрачено и сколько осталось.</p>
+     </div>
+    </div>
+
+    <div class="section-kpi">
+     <div class="kpi"><small>Всего лимитов</small><b id="budgetTotalLimit">0 ₸</b></div>
+     <div class="kpi"><small>Потрачено по лимитам</small><b id="budgetTotalUsed">0 ₸</b></div>
+     <div class="kpi"><small>Остаток</small><b id="budgetTotalLeft">0 ₸</b></div>
+    </div>
+
+    <div class="grid2">
+     <div class="panel">
+      <h3>Добавить бюджет</h3>
+      <div class="form-grid">
+       <div class="field">
+        <label>Категория</label>
+        <select id="budgetCategory"></select>
+       </div>
+       <div class="field">
+        <label>Лимит</label>
+        <input id="budgetLimit" type="number" placeholder="50000" />
+       </div>
+       <div class="field full">
+        <button class="purple-btn" id="addBudgetBtn">＋ Добавить бюджет</button>
+       </div>
+      </div>
+     </div>
+
+     <div class="panel">
+      <h3>Список бюджетов</h3>
+      <div class="module-list" id="budgetsList"></div>
+     </div>
+    </div>
+   </section>
+
+   <section class="view" id="goals">
+    <div class="page-head">
+     <div>
+      <h2>Цели</h2>
+      <p>Создавай цели, пополняй накопления и отслеживай прогресс до нужной суммы.</p>
+     </div>
+    </div>
+
+    <div class="section-kpi">
+     <div class="kpi"><small>Целей</small><b id="goalsCountKpi">0</b></div>
+     <div class="kpi"><small>Накоплено</small><b id="goalsSavedKpi">0 ₸</b></div>
+     <div class="kpi"><small>Нужно всего</small><b id="goalsTargetKpi">0 ₸</b></div>
+    </div>
+
+    <div class="grid2">
+     <div class="panel">
+      <h3>Добавить цель</h3>
+      <div class="form-grid">
+       <div class="field">
+        <label>Название</label>
+        <input id="goalName" placeholder="Финансовая подушка" />
+       </div>
+       <div class="field">
+        <label>Цель</label>
+        <input id="goalTarget" type="number" placeholder="1000000" />
+       </div>
+       <div class="field">
+        <label>Уже накоплено</label>
+        <input id="goalSaved" type="number" placeholder="0" />
+       </div>
+       <div class="field full">
+        <button class="purple-btn" id="addGoalBtn">＋ Добавить цель</button>
+       </div>
+      </div>
+     </div>
+
+     <div class="panel">
+      <h3>Мои цели</h3>
+      <div class="module-list" id="goalsList"></div>
+     </div>
+    </div>
+   </section>
+
+   <section class="view" id="subs">
+    <div class="page-head">
+     <div>
+      <h2>Подписки</h2>
+      <p>Контролируй подписки и регулярные списания, чтобы заранее видеть месячную нагрузку.</p>
+     </div>
+    </div>
+
+    <div class="section-kpi">
+     <div class="kpi"><small>Подписок</small><b id="subsCountKpi">0</b></div>
+     <div class="kpi"><small>В месяц</small><b id="subsMonthKpi">0 ₸</b></div>
+     <div class="kpi"><small>В год</small><b id="subsYearKpi">0 ₸</b></div>
+    </div>
+
+    <div class="grid2">
+     <div class="panel">
+      <h3>Добавить подписку</h3>
+      <div class="form-grid">
+       <div class="field">
+        <label>Название</label>
+        <input id="subName" placeholder="YouTube Premium" />
+       </div>
+       <div class="field">
+        <label>Сумма</label>
+        <input id="subAmount" type="number" placeholder="2990" />
+       </div>
+       <div class="field">
+        <label>Категория</label>
+        <select id="subCategory"></select>
+       </div>
+       <div class="field">
+        <label>День списания</label>
+        <input id="subDay" type="number" min="1" max="31" placeholder="15" />
+       </div>
+       <div class="field full">
+        <button class="purple-btn" id="addSubBtn">＋ Добавить подписку</button>
+       </div>
+      </div>
+     </div>
+
+     <div class="panel">
+      <h3>Мои подписки</h3>
+      <div class="module-list" id="subsList"></div>
+     </div>
+    </div>
+   </section>
+
+   <section class="view" id="debts">
+    <div class="page-head">
+     <div>
+      <h2>Долги</h2>
+      <p>Следи за долгами, остатками и прогрессом погашения без лишней путаницы.</p>
+     </div>
+    </div>
+
+    <div class="section-kpi">
+     <div class="kpi"><small>Всего долгов</small><b id="debtsTotalKpi">0 ₸</b></div>
+     <div class="kpi"><small>Оплачено</small><b id="debtsPaidKpi">0 ₸</b></div>
+     <div class="kpi"><small>Осталось</small><b id="debtsLeftKpi">0 ₸</b></div>
+    </div>
+
+    <div class="grid2">
+     <div class="panel">
+      <h3>Добавить долг</h3>
+      <div class="form-grid">
+       <div class="field">
+        <label>Название</label>
+        <input id="debtName" placeholder="Рассрочка / кредит" />
+       </div>
+       <div class="field">
+        <label>Сумма долга</label>
+        <input id="debtTotal" type="number" placeholder="300000" />
+       </div>
+       <div class="field">
+        <label>Уже оплачено</label>
+        <input id="debtPaid" type="number" placeholder="0" />
+       </div>
+       <div class="field">
+        <label>Ежемесячный платёж</label>
+        <input id="debtPayment" type="number" placeholder="25000" />
+       </div>
+       <div class="field full">
+        <button class="purple-btn" id="addDebtBtn">＋ Добавить долг</button>
+       </div>
+      </div>
+     </div>
+
+     <div class="panel">
+      <h3>Список долгов</h3>
+      <div class="module-list" id="debtsList"></div>
+     </div>
+    </div>
+   </section>
+
+   <section class="view" id="invest">
+    <div class="page-head">
+     <div>
+      <h2>Инвестиции</h2>
+      <p>Веди инвестиционный портфель, вложения, текущую стоимость и результат.</p>
+     </div>
+    </div>
+
+    <div class="section-kpi">
+     <div class="kpi"><small>Вложено</small><b id="investCostKpi">0 ₸</b></div>
+     <div class="kpi"><small>Сейчас</small><b id="investValueKpi">0 ₸</b></div>
+     <div class="kpi"><small>Результат</small><b id="investPnlKpi">0 ₸</b></div>
+    </div>
+
+    <div class="grid2">
+     <div class="panel">
+      <h3>Добавить актив</h3>
+      <div class="form-grid">
+       <div class="field">
+        <label>Актив</label>
+        <input id="assetName" placeholder="BTC / AAPL / KASE" />
+       </div>
+       <div class="field">
+        <label>Количество</label>
+        <input id="assetQty" type="number" step="any" placeholder="1" />
+       </div>
+       <div class="field">
+        <label>Цена покупки</label>
+        <input id="assetBuy" type="number" placeholder="100000" />
+       </div>
+       <div class="field">
+        <label>Текущая цена</label>
+        <input id="assetNow" type="number" placeholder="120000" />
+       </div>
+       <div class="field full">
+        <button class="purple-btn" id="addAssetBtn">＋ Добавить актив</button>
+       </div>
+      </div>
+     </div>
+
+     <div class="panel">
+      <h3>Портфель</h3>
+      <div class="module-list" id="investList"></div>
+     </div>
+    </div>
+   </section>
+
+
+   <section class="view" id="dashboards">
+    <div class="page-head">
+     <div>
+      <h2>Dashboard Studio</h2>
+      <p>Полноценный конструктор главной страницы: пресеты, виджеты, размеры, порядок и облачное сохранение.</p>
+     </div>
+    </div>
+
+    <div class="dash-studio-hero">
+     <div>
+      <h3>Собери свой финансовый центр</h3>
+      <p>Выбирай пресет, добавляй виджеты, меняй размеры карточек и порядок. Настройки сохраняются в Firestore для твоего аккаунта.</p>
+     </div>
+     <div class="dash-studio-actions">
+      <button class="ghost-btn" id="dashAddAllBtn" type="button">Добавить всё</button>
+      <button class="ghost-btn" id="dashResetBtn" type="button">Сбросить</button>
+      <button class="purple-btn" id="dashSaveBtn" type="button">Сохранить</button>
+     </div>
+    </div>
+
+    <div class="dash-studio-layout">
+     <div class="dash-studio-side">
+      <div class="dash-studio-panel">
+       <h3>Пресеты</h3>
+       <div class="dash-preset-list">
+        <button class="dash-preset-pro" type="button" data-dash-preset="aurora"><b>✨ Aurora</b><small>Красивый общий обзор: баланс, доходы, расходы, цели, операции и график.</small></button>
+        <button class="dash-preset-pro" type="button" data-dash-preset="minimal"><b>◌ Minimal</b><small>Самые важные цифры без перегруза.</small></button>
+        <button class="dash-preset-pro" type="button" data-dash-preset="investor"><b>↗ Investor</b><small>Фокус на инвестициях, капитале, доходах и динамике.</small></button>
+        <button class="dash-preset-pro" type="button" data-dash-preset="business"><b>▣ Business</b><small>Доходы, расходы, бюджеты, долги и последние операции.</small></button>
+        <button class="dash-preset-pro" type="button" data-dash-preset="control"><b>🛡 Control</b><small>Подписки, долги, бюджеты и финансовое здоровье.</small></button>
+       </div>
+      </div>
+
+      <div class="dash-studio-panel">
+       <h3>Библиотека виджетов</h3>
+       <div class="dash-widget-list" id="dashWidgetLibrary"></div>
+      </div>
+     </div>
+
+     <div class="dash-studio-panel">
+      <h3>Мой дашборд</h3>
+      <div class="dash-canvas-pro" id="dashCanvas"></div>
+     </div>
+    </div>
+   </section>
+
+   <section class="view" id="reports">
+    <div class="page-head"><div><h2>Отчёты</h2><p>Готовь отчёты, выгружай данные и анализируй финансовые итоги.</p></div></div>
+    <div class="panel">
+     <h3>Текстовый отчёт</h3>
+     <textarea id="reportText" style="width:100%;min-height:330px;border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:12px;padding:14px;outline:0"></textarea>
+    </div>
+   </section>
+
+   
+<section class="view" id="settings">
+  <div class="page-head">
+    <div>
+      <h2>Аккаунт</h2>
+      <p>Данные аккаунта, облачное сохранение и управление личным профилем.</p>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3>Активный аккаунт</h3>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>UID</label>
+          <input id="currentUserIdInput" readonly />
+        </div>
+
+        <div class="field">
+          <label>Email</label>
+          <input id="currentUserEmailInput" readonly />
+        </div>
+
+        <div class="field full">
+          <button class="purple-btn" id="clearLocalBtn">
+            Очистить данные текущего аккаунта
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Статус</h3>
+
+      <div class="info-box">
+        Аккаунт подключён и готов к работе.
+        Все таблицы и данные сохраняются в Firestore отдельно для каждого пользователя.
+      </div>
+    </div>
+  </div>
+</section>
+
+  </main>
+ </div>
+
+ <input type="file" id="fileInput" accept=".json,.csv,text/csv,application/json" style="display:none" />
+
+
+ <a class="telegram-float-btn" id="telegramBotBtn" href="https://t.me/my_rashodi_bot?start=site" target="_blank" rel="noopener" title="Открыть FinCenter Bot">
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+   <path fill="currentColor" d="M21.8 4.6c.3-1.2-.8-2.2-2-1.7L2.9 9.4c-1.2.5-1.2 2.1.1 2.5l4.3 1.3 1.7 5.3c.4 1.2 1.9 1.4 2.6.4l2.4-3.2 4.5 3.3c1 .7 2.3.1 2.5-1.1l2.8-13.3ZM8.1 12.4l9.9-6.1c.4-.2.8.3.5.6l-8.1 7.5-.3 3.1-1.2-3.8-.8-1.3Z"/>
+  </svg>
+ </a>
+ <div class="telegram-float-label" id="telegramBotLabel"><strong>Бот готов к подключению</strong><span>Подключи Telegram и управляй финансами прямо из чата.</span></div>
+
+ <div class="toast-zone" id="toastZone"></div>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script>
+/* ================= TELEGRAM WEBAPP GOOGLE FIX ================= */
+(function () {
+  const OFFICIAL_SITE_URL = "https://fincenter-pro.web.app";
+
+  function isTelegramWebApp() {
+    const ua = navigator.userAgent || "";
+    return Boolean(
+      window.Telegram ||
+      window.Telegram?.WebApp ||
+      ua.includes("Telegram") ||
+      ua.includes("TelegramBot")
+    );
+  }
+
+  function openOfficialSite() {
+    try {
+      if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.openLink(OFFICIAL_SITE_URL, {
+          try_instant_view: false
+        });
+        return;
+      }
+    } catch (error) {
+      console.warn("Telegram openLink failed:", error);
+    }
+
+    window.open(OFFICIAL_SITE_URL, "_blank", "noopener,noreferrer");
+  }
+
+  function applyTelegramMode() {
+    if (!isTelegramWebApp()) return;
+    document.body.classList.add("telegram-webapp-mode");
+  }
+
+  document.addEventListener("DOMContentLoaded", applyTelegramMode);
+  window.addEventListener("load", applyTelegramMode);
+})();
+</script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+ <script>
+
+/*
+ FINCENTER — LOCAL WORKING VERSION
+
+ Эта версия работает даже если открыть index.html двойным кликом.
+ Google/Firebase можно подключить позже, но кнопки, разделы, таблица,
+ операции, сохранение, импорт/экспорт и аналитика работают локально.
+*/
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCdI-CZm8R5RGReYFf4UFjsSkahZGhs3cA",
+  authDomain: "fincenter-pro.firebaseapp.com",
+  projectId: "fincenter-pro",
+  storageBucket: "fincenter-pro.firebasestorage.app",
+  messagingSenderId: "374473145617",
+  appId: "1:374473145617:web:54ef693de0e6b2b83b60b0"
+};
+
+const AuthService = {
+  firebaseReady: false,
+  app: null,
+  auth: null,
+  provider: null,
+  telegramLoginContainerId: "telegramLoginWidget",
+  backendUrl: "https://finance-bot-production-0814.up.railway.app",
+
+  localUser: {
+    uid: "local_demo_user",
+    displayName: "Demo",
+    email: "",
+    photoURL: "",
+    provider: "local"
+  },
+
+  initFirebase() {
+    try {
+      if (!window.firebase) {
+        console.error("Firebase SDK не загрузился: window.firebase отсутствует.");
+        this.firebaseReady = false;
+        return false;
+      }
+
+      if (!window.firebase.auth) {
+        console.error("Firebase Auth SDK не загрузился: firebase.auth отсутствует.");
+        this.firebaseReady = false;
+        return false;
+      }
+
+      if (!window.firebase.apps.length) {
+        this.app = window.firebase.initializeApp(firebaseConfig);
+      } else {
+        this.app = window.firebase.app();
+      }
+
+      this.auth = window.firebase.auth();
+      this.auth.languageCode = "ru";
+      this.auth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL).catch(console.warn);
+
+      this.provider = new window.firebase.auth.GoogleAuthProvider();
+      this.provider.setCustomParameters({
+        prompt: "select_account"
+      });
+
+      this.firebaseReady = true;
+      return true;
+    } catch (error) {
+      console.error("Firebase init failed:", error);
+      this.firebaseReady = false;
+      return false;
+    }
+  },
+
+  normalizeUser(user) {
+    if (!user) return null;
+
+    const providerData = Array.isArray(user.providerData) ? user.providerData : [];
+    const isTelegram = String(user.uid || "").startsWith("telegram:");
+
+    return {
+      uid: user.uid,
+      displayName: user.displayName || user.email || (isTelegram ? "Telegram User" : "Google User"),
+      email: user.email || (isTelegram ? "telegram@fincenter.local" : "unknown@email"),
+      photoURL: user.photoURL || "",
+      provider: isTelegram ? "telegram" : (providerData[0]?.providerId || "firebase")
+    };
+  },
+
+  async telegramSignIn(payload) {
+    const hasFirebase = this.firebaseReady || this.initFirebase();
+
+    if (!hasFirebase || !this.auth) {
+      throw new Error("Firebase Auth не готов для Telegram-входа.");
+    }
+
+    const response = await fetch(`${this.backendUrl}/api/auth/telegram`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok || !data?.token) {
+      throw new Error(data?.error || "Telegram-вход не выполнен.");
+    }
+
+    const result = await this.auth.signInWithCustomToken(data.token);
+    const normalized = data.user || this.normalizeUser(result.user);
+
+    localStorage.setItem("fincenter-current-user", JSON.stringify(normalized));
+    localStorage.setItem("fincenter_telegram_connected", "1");
+    localStorage.setItem("fincenter_telegram_uid", normalized.uid);
+
+    const telegramWidget = document.getElementById(this.telegramLoginContainerId);
+    if (telegramWidget) telegramWidget.classList.add("telegram-hidden");
+
+    return normalized;
+  },
+
+  async signInWithTelegramWebApp() {
+    const tg = window.Telegram && window.Telegram.WebApp;
+
+    if (!tg || !tg.initData) {
+      return null;
+    }
+
+    try {
+      tg.ready && tg.ready();
+    } catch {}
+
+    return await this.telegramSignIn({
+      initData: tg.initData
+    });
+  },
+
+  renderTelegramLoginWidget() {
+    const holder = document.getElementById(this.telegramLoginContainerId);
+    if (!holder || holder.dataset.ready === "1") return;
+
+    holder.innerHTML = "";
+    holder.dataset.ready = "1";
+
+    window.onTelegramAuth = async (user) => {
+      try {
+        if (window.App && typeof App.toast === "function") {
+          App.toast("Проверяю Telegram-вход...");
+        }
+
+        const normalized = await this.telegramSignIn(user);
+
+        if (window.App) {
+          App.currentUser = normalized;
+          const saved = await DataService.load(normalized.uid);
+          App.state = App.normalizeState(saved || App.defaultState());
+          App.renderSignedIn();
+          App.renderAll();
+          App.toast("Telegram-вход выполнен. Аккаунт активен.");
+          if (window.FinCenterTelegram) window.FinCenterTelegram.markConnected();
+        }
+      } catch (error) {
+        console.error("Telegram login error:", error);
+        alert("Telegram-вход не выполнен:\n\n" + (error.message || "неизвестная ошибка"));
+      }
+    };
+
+    const script = document.createElement("script");
+    script.async = true;
+    script.src = "https://telegram.org/js/telegram-widget.js?22";
+    script.setAttribute("data-telegram-login", "my_rashodi_bot");
+    script.setAttribute("data-size", "large");
+    script.setAttribute("data-radius", "10");
+    script.setAttribute("data-userpic", "false");
+    script.setAttribute("data-request-access", "write");
+    script.setAttribute("data-onauth", "onTelegramAuth(user)");
+    holder.appendChild(script);
+  },
+
+  async init() {
+    const hasFirebase = this.initFirebase();
+
+    if (!hasFirebase) {
+      return this.localUser;
+    }
+
+    try {
+      const telegramUser = await this.signInWithTelegramWebApp();
+
+      if (telegramUser) {
+        return telegramUser;
+      }
+    } catch (error) {
+      console.warn("Telegram WebApp auth failed:", error);
+    }
+
+    return new Promise(resolve => {
+      this.auth.onAuthStateChanged(user => {
+        if (user) {
+          const normalized = this.normalizeUser(user);
+          localStorage.setItem("fincenter-current-user", JSON.stringify(normalized));
+          resolve(normalized);
+          return;
+        }
+
+        resolve(this.localUser);
+      });
+    });
+  },
+
+  async signIn() {
+    if (!this.firebaseReady || !this.auth || !this.provider) {
+      throw new Error("Firebase Auth не готов. Проверь подключение Firebase SDK и firebaseConfig.");
+    }
+
+    const result = await this.auth.signInWithPopup(this.provider);
+    const normalized = this.normalizeUser(result.user);
+    localStorage.setItem("fincenter-current-user", JSON.stringify(normalized));
+    return normalized;
+  },
+
+  async signOut() {
+    if (this.firebaseReady && this.auth) {
+      await this.auth.signOut();
+    }
+
+    localStorage.removeItem("fincenter-current-user");
+    localStorage.removeItem("fincenter_telegram_uid");
+    localStorage.removeItem("fincenter_telegram_connected");
+    return this.localUser;
+  }
+};
+
+const DataService = {
+ namespace: "fincenter-v4-cloud",
+ db: null,
+ apiBase: "https://finance-bot-production-0814.up.railway.app",
+ lastRemoteUpdatedAt: 0,
+
+ key(uid) {
+  return `${this.namespace}:${uid}`;
+ },
+
+ normalizeRemoteState(remote) {
+  if (!remote || typeof remote !== "object") return null;
+
+  const state = remote.state && typeof remote.state === "object" ? remote.state : remote;
+
+  if (state.tableData && !state.sheet) {
+   state.sheet = state.tableData;
+  }
+
+  if (state.sheet && !state.tableData) {
+   state.tableData = state.sheet;
+  }
+
+  return state;
+ },
+
+ getUpdatedAtValue(data) {
+  const value = data?.updatedAt || data?.state?.updatedAt || 0;
+
+  if (typeof value === "number") return value;
+
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+ },
+
+ async apiLoad(uid) {
+  if (!uid || uid === "local_demo_user") return null;
+
+  const response = await fetch(`${this.apiBase}/api/state?userId=${encodeURIComponent(uid)}`, {
+   method: "GET",
+   cache: "no-store"
+  });
+
+  if (!response.ok) {
+   throw new Error(`API load failed: ${response.status}`);
+  }
+
+  const remote = await response.json();
+  this.lastRemoteUpdatedAt = this.getUpdatedAtValue(remote);
+  return this.normalizeRemoteState(remote);
+ },
+
+ async apiSave(uid, data) {
+  if (!uid || uid === "local_demo_user") return false;
+
+  const payload = {
+   ...data,
+   sheet: data.sheet || data.tableData || {},
+   tableData: data.tableData || data.sheet || {},
+   updatedAt: Date.now()
+  };
+
+  const response = await fetch(`${this.apiBase}/api/state?userId=${encodeURIComponent(uid)}`, {
+   method: "POST",
+   headers: {
+    "Content-Type": "application/json"
+   },
+   body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+   throw new Error(`API save failed: ${response.status}`);
+  }
+
+  this.lastRemoteUpdatedAt = payload.updatedAt;
+  return true;
+ },
+
+ initDb() {
+  try {
+   if (window.firebase && window.firebase.firestore) {
+    this.db = window.firebase.firestore();
+    return true;
+   }
+
+   return false;
+  } catch (error) {
+   console.warn("Firestore init failed. Использую API/localStorage:", error);
+   this.db = null;
+   return false;
+  }
+ },
+
+ doc(uid) {
+  if (!this.db || !uid || uid === "local_demo_user") return null;
+  return this.db.collection("users").doc(uid);
+ },
+
+ async load(uid) {
+  const localRaw = localStorage.getItem(this.key(uid));
+  const localData = localRaw ? JSON.parse(localRaw) : null;
+
+  try {
+   const apiState = await this.apiLoad(uid);
+
+   if (apiState) {
+    localStorage.setItem(this.key(uid), JSON.stringify(apiState));
+    return apiState;
+   }
+  } catch (error) {
+   console.warn("API load failed, fallback enabled:", error);
+  }
+
+  this.initDb();
+  const ref = this.doc(uid);
+
+  if (!ref) {
+   return localData;
+  }
+
+  try {
+   const snap = await ref.get();
+
+   if (snap.exists) {
+    const cloud = snap.data() || {};
+    const cloudState = this.normalizeRemoteState(cloud);
+
+    localStorage.setItem(this.key(uid), JSON.stringify(cloudState));
+    return cloudState;
+   }
+
+   if (localData) {
+    await this.save(uid, localData);
+    return localData;
+   }
+
+   return null;
+  } catch (error) {
+   console.warn("Firestore load failed, using localStorage:", error);
+   return localData;
+  }
+ },
+
+ async save(uid, data) {
+  const payload = {
+   ...data,
+   sheet: data.sheet || data.tableData || {},
+   tableData: data.tableData || data.sheet || {},
+   updatedAt: Date.now()
+  };
+
+  localStorage.setItem(this.key(uid), JSON.stringify(payload));
+
+  try {
+   const saved = await this.apiSave(uid, payload);
+   if (saved) return;
+  } catch (error) {
+   console.warn("API save failed, fallback enabled:", error);
+  }
+
+  this.initDb();
+  const ref = this.doc(uid);
+
+  if (!ref) {
+   return;
+  }
+
+  try {
+   await ref.set({
+    uid,
+    ...payload,
+    state: payload,
+    updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+   }, { merge: true });
+  } catch (error) {
+   console.warn("Firestore save failed, localStorage backup used:", error);
+  }
+ },
+
+ async clear(uid) {
+  localStorage.removeItem(this.key(uid));
+
+  try {
+   if (uid && uid !== "local_demo_user") {
+    await fetch(`${this.apiBase}/api/reset?userId=${encodeURIComponent(uid)}`, {
+     method: "POST"
+    });
+    return;
+   }
+  } catch (error) {
+   console.warn("API clear failed, fallback enabled:", error);
+  }
+
+  this.initDb();
+  const ref = this.doc(uid);
+
+  if (!ref) {
+   return;
+  }
+
+  try {
+   await ref.delete();
+  } catch (error) {
+   console.warn("Firestore clear failed:", error);
+  }
+ }
+};
+
+const App = {
+ currentUser: null,
+ state: null,
+
+ defaultState() {
+  return {
+   theme: "dark",
+   currency: "₸",
+   operationType: "expense",
+   operations: [],
+   sheet: {},
+   history: [],
+   budgets: [],
+   goals: [],
+   subscriptions: [],
+   debts: [],
+   investments: [],
+      customColumns: [],
+   tableSettings: {
+    fitMode: "fit",
+    height: "normal",
+    autosave: "on"
+   },
+   createdAt: new Date().toISOString(),
+   updatedAt: new Date().toISOString()
+  };
+ },
+
+
+ normalizeState(state) {
+  const base = this.defaultState();
+  const merged = {
+   ...base,
+   ...(state || {}),
+   tableSettings: {
+    ...base.tableSettings,
+    ...((state && state.tableSettings) || {})
+   }
+  };
+
+  merged.operations = Array.isArray(merged.operations) ? merged.operations : [];
+  merged.history = Array.isArray(merged.history) ? merged.history : [];
+  merged.budgets = Array.isArray(merged.budgets) ? merged.budgets : [];
+  merged.goals = Array.isArray(merged.goals) ? merged.goals : [];
+  merged.subscriptions = Array.isArray(merged.subscriptions) ? merged.subscriptions : [];
+  merged.debts = Array.isArray(merged.debts) ? merged.debts : [];
+  merged.investments = Array.isArray(merged.investments) ? merged.investments : [];
+    merged.customColumns = Array.isArray(merged.customColumns) ? merged.customColumns : [];
+  merged.sheet = merged.sheet && typeof merged.sheet === "object" ? merged.sheet : {};
+  return merged;
+ },
+
+ currencies: [
+  ["₸", "₸ KZT"],
+  ["$", "$ USD"],
+  ["€", "€ EUR"],
+  ["₽", "₽ RUB"],
+  ["£", "£ GBP"],
+  ["¥", "¥ CNY"]
+ ],
+
+ groups: [
+  {
+   name: "ФОНД ЖИЗНИ",
+   percent: "",
+   className: "life",
+   titleClass: "life-title",
+   columns: [
+    ["CATEGORY", "label"],
+    ["INCOME", "income"],
+    ["Квартира", "expense"],
+    ["Доставка", "expense"],
+    ["Продукты", "expense"],
+    ["Здоровье", "expense"],
+    ["Налоги", "expense"],
+    ["Кальянка", "expense"],
+    ["Клининг", "expense"],
+    ["Тренировки", "expense"]
+   ],
+   percents: []
+  },
+  {
+   name: "ФОНД ВЕСЕЛЬЯ",
+   percent: "",
+   className: "fun",
+   titleClass: "fun-title",
+   columns: [
+    ["Такси", "expense"],
+    ["Офис", "expense"],
+    ["Ресторан", "expense"],
+    ["Свидание", "expense"],
+    ["Развлечения", "expense"],
+    ["Туры", "expense"],
+    ["Покупки", "expense"],
+    ["Подарки", "expense"],
+    ["Путешествия", "expense"]
+   ],
+   percents: []
+  },
+  {
+   name: "ФОНД БУДУЩЕЕ",
+   percent: "",
+   className: "future",
+   titleClass: "future-title",
+   columns: [
+    ["Подушка", "saving"],
+    ["Брокер", "saving"],
+    ["Крипта", "saving"],
+    ["Бизнес", "saving"],
+    ["Красота", "saving"],
+    ["Обучение", "saving"]
+   ],
+   percents: []
+  }
+ ],
+
+ async init() {
+  try {
+   this.currentUser = await AuthService.init();
+   const saved = await DataService.load(this.currentUser.uid);
+   this.state = this.normalizeState(saved || this.defaultState());
+   await this.syncBotOperationsToSheet();
+
+   this.applyTheme();
+   this.bindEvents();
+   this.renderCategoryOptions();
+   this.renderCurrencyOptions();
+   this.renderSheet();
+   this.renderSignedIn();
+   AuthService.renderTelegramLoginWidget();
+   this.renderAll();
+   this.startCloudSync();
+
+   const dateInput = document.getElementById("dateInput");
+   if (dateInput) dateInput.value = this.today();
+
+   this.toast("Сайт загружен. Кнопки работают.");
+  } catch (error) {
+   console.error(error);
+   alert("Ошибка запуска сайта: " + error.message);
+  }
+ },
+
+ today() {
+  return new Date().toISOString().slice(0, 10);
+ },
+
+ uid() {
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+ },
+
+ async save() {
+  if (!this.currentUser) return;
+  this.state.sheet = this.state.sheet || {};
+  this.state.tableData = this.state.sheet;
+  await DataService.save(this.currentUser.uid, this.state);
+ },
+
+ async refreshFromCloud(silent = true) {
+  if (!this.currentUser || this.currentUser.uid === "local_demo_user") return;
+
+  try {
+   const remote = await DataService.load(this.currentUser.uid);
+   if (!remote) return;
+
+   const remoteUpdatedAt = DataService.getUpdatedAtValue(remote);
+   const localUpdatedAt = DataService.getUpdatedAtValue(this.state);
+
+   if (remoteUpdatedAt && localUpdatedAt && remoteUpdatedAt <= localUpdatedAt) return;
+
+   this.state = this.normalizeState(remote);
+   await this.syncBotOperationsToSheet(false);
+   this.applyTheme();
+   this.renderAll();
+
+   if (!silent) {
+    this.toast("Данные обновлены из Firebase.");
+   }
+  } catch (error) {
+   console.warn("Cloud refresh failed:", error);
+  }
+ },
+
+ startCloudSync() {
+  if (this.__cloudSyncStarted) return;
+  this.__cloudSyncStarted = true;
+
+  setInterval(() => {
+   this.refreshFromCloud(true);
+  }, 7000);
+ },
+
+ async syncBotOperationsToSheet(shouldSave = true) {
+  if (!this.state) return false;
+
+  this.state.sheet = this.state.sheet || {};
+  this.state.operations = Array.isArray(this.state.operations) ? this.state.operations : [];
+
+  let changed = false;
+
+  for (const operation of this.state.operations) {
+   if (!operation || operation.sheetKey) continue;
+
+   const amount = Math.abs(Number(operation.amount || 0));
+   const category = operation.sheetCategory || operation.category;
+
+   if (!amount || !category) continue;
+
+   const sheetKey = this.addValueToSheet(category, amount);
+
+   if (sheetKey) {
+    operation.sheetKey = sheetKey;
+    operation.sheetCategory = category;
+    operation.sheetAmount = amount;
+    changed = true;
+   }
+  }
+
+  if (changed && shouldSave) {
+   await this.save();
+  }
+
+  return changed;
+ },
+
+ money(value) {
+  const n = Number(value) || 0;
+  return new Intl.NumberFormat("ru-RU", {
+   minimumFractionDigits: 2,
+   maximumFractionDigits: 2
+  }).format(n) + " " + this.state.currency;
+ },
+
+ shortNumber(value) {
+  return new Intl.NumberFormat("ru-RU", {
+   maximumFractionDigits: 2
+  }).format(value);
+ },
+
+ formatDate(date) {
+  if (!date) return "";
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return date;
+  return d.toLocaleDateString("ru-RU");
+ },
+
+ bindEvents() {
+  const nav = document.getElementById("nav");
+  if (nav) {
+   nav.addEventListener("click", event => {
+    const btn = event.target.closest("button[data-view]");
+    if (!btn) return;
+    this.setView(btn.dataset.view);
+   });
+  }
+
+  document.querySelectorAll("[data-go]").forEach(btn => {
+   btn.addEventListener("click", () => this.setView(btn.dataset.go));
+  });
+
+  document.querySelectorAll("[data-table-tab]").forEach(btn => {
+   btn.addEventListener("click", () => this.setTableTab(btn.dataset.tableTab));
+  });
+
+  this.on("themeBtn", "click", () => this.toggleTheme());
+  this.on("notifyBtn", "click", () => this.toast(`Баланс: ${this.money(this.totals().balance)} · операций: ${this.state.operations.length}`));
+  this.on("googleBtn", "click", () => this.signIn());
+  this.on("logoutBtn", "click", () => this.signOut());
+  this.on("exportBtn", "click", () => this.exportJSON());
+  this.on("exportCsvBtn", "click", () => this.exportCSV());
+  this.on("opsExportBtn", "click", () => this.exportCSV());
+  this.on("importBtn", "click", () => document.getElementById("fileInput").click());
+  this.on("fileInput", "change", e => this.importFile(e.target.files[0]));
+  this.on("resetTableBtn", "click", () => this.resetTable());
+  this.on("clearSheetOnlyBtn", "click", () => this.clearSheetOnly());
+  this.on("clearLocalBtn", "click", () => this.clearCurrentUserData());
+  this.on("addEmptyRowBtn", "click", () => this.toast("Строки уже есть: просто вводи данные в ячейки."));
+  this.on("addCustomColumnBtn", "click", () => this.openCustomColumnModal());
+  this.on("closeCustomModal", "click", () => this.closeCustomColumnModal());
+  this.on("saveCustomColumnBtn", "click", () => this.saveCustomColumn());
+  const customColumnModal = document.getElementById("customColumnModal");
+  if (customColumnModal) {
+   customColumnModal.addEventListener("click", event => {
+    if (event.target === customColumnModal) this.closeCustomColumnModal();
+   });
+  }
+
+  this.on("fitMode", "change", e => {
+   this.state.tableSettings = this.state.tableSettings || {};
+   this.state.tableSettings.fitMode = e.target.value;
+   this.applyTableSettings();
+   this.save();
+  });
+
+  this.on("settingsFitMode", "change", e => {
+   this.state.tableSettings = this.state.tableSettings || {};
+   this.state.tableSettings.fitMode = e.target.value;
+   const fitMode = document.getElementById("fitMode");
+   if (fitMode) fitMode.value = e.target.value;
+   this.applyTableSettings();
+   this.save();
+  });
+
+  this.on("settingsTableHeight", "change", e => {
+   this.state.tableSettings = this.state.tableSettings || {};
+   this.state.tableSettings.height = e.target.value;
+   this.applyTableSettings();
+   this.save();
+  });
+
+  this.on("settingsAutosave", "change", e => {
+   this.state.tableSettings = this.state.tableSettings || {};
+   this.state.tableSettings.autosave = e.target.value;
+   this.save();
+   this.toast("Настройка автосохранения обновлена.");
+  });
+
+  this.on("settingsCurrencySelect", "change", async e => {
+   this.state.currency = e.target.value;
+   const currencySelect = document.getElementById("currencySelect");
+   if (currencySelect) currencySelect.value = e.target.value;
+   await this.save();
+   this.renderAll();
+  });
+
+  this.on("saveTableSettingsBtn", "click", async () => {
+   await this.save();
+   this.toast("Настройки таблицы сохранены.");
+  });
+
+  this.on("clearHistoryBtn", "click", async () => {
+   if (!confirm("Очистить историю изменений?")) return;
+   this.state.history = [];
+   await this.save();
+   this.renderHistory();
+   this.toast("История очищена.");
+  });
+
+  this.on("currencySelect", "change", async e => {
+   this.state.currency = e.target.value;
+   await this.save();
+   this.renderAll();
+  });
+
+  this.on("expenseType", "click", () => {
+   this.state.operationType = "expense";
+   this.renderTypeButtons();
+  });
+
+  this.on("incomeType", "click", () => {
+   this.state.operationType = "income";
+   this.renderTypeButtons();
+  });
+
+  this.on("addOperationBtn", "click", () => this.addOperation());
+  this.on("descInput", "input", event => this.smartFillFromText(event.target.value));
+  this.on("globalSearch", "input", () => {
+   this.renderRecent();
+   this.renderOperationsList();
+  });
+
+  this.on("addBudgetBtn", "click", () => this.addBudget());
+  this.on("addGoalBtn", "click", () => this.addGoal());
+  this.on("addSubBtn", "click", () => this.addSubscription());
+  this.on("addDebtBtn", "click", () => this.addDebt());
+  this.on("addAssetBtn", "click", () => this.addInvestment());
+  this.on("operationCurrency", "change", e => {
+   const symbol = String(e.target.value || "₸").trim().split(" ")[0];
+   if (symbol) {
+    this.state.currency = symbol;
+    this.save();
+    this.renderAll();
+   }
+  });
+
+  this.on("themeBtn", "contextmenu", event => {
+   event.preventDefault();
+   this.toast("Тема переключается обычным кликом.");
+  });
+ },
+
+ on(id, eventName, handler) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener(eventName, handler);
+ },
+
+ async signIn() {
+  try {
+   this.toast("Открываю Google-вход...");
+   this.currentUser = await AuthService.signIn();
+   const saved = await DataService.load(this.currentUser.uid);
+   this.state = this.normalizeState(saved || this.defaultState());
+   this.renderSignedIn();
+   this.renderAll();
+   this.toast("Google-вход выполнен. Аккаунт активен.");
+  } catch (error) {
+   console.error("Google login error:", error);
+   const code = error?.code || "";
+   let message = error?.message || "неизвестная ошибка";
+
+   if (code.includes("unauthorized-domain")) message = "Домен не разрешён в Firebase Auth. Добавь домен сайта в Authorized domains.";
+   if (code.includes("popup-closed-by-user")) message = "Окно Google-входа закрыто.";
+   if (code.includes("popup-blocked")) message = "Браузер заблокировал popup. Разреши всплывающие окна.";
+   if (code.includes("api-key-not-valid") || message.includes("API key not valid")) message = "Firebase API key неверный. Проверь firebaseConfig.";
+
+   this.toast("Google-вход не выполнен: " + message);
+   alert("Google-вход не выполнен:\n\n" + message);
+  }
+ },
+
+ async signOut() {
+  await AuthService.signOut();
+  this.currentUser = await AuthService.init();
+  const saved = await DataService.load(this.currentUser.uid);
+  this.state = this.normalizeState(saved || this.defaultState());
+  this.renderSignedIn();
+  this.renderAll();
+  this.toast("Вы вышли из Google. Включён локальный demo-пользователь.");
+ },
+
+ renderSignedIn() {
+  const googleBtn = document.getElementById("googleBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const userCard = document.getElementById("userCard");
+
+  const telegramWidget = document.getElementById("telegramLoginWidget");
+  const isTelegramUser = String(this.currentUser?.uid || "").startsWith("telegram:") || this.currentUser?.provider === "telegram";
+  const isLocalUser = this.currentUser.uid === "local_demo_user";
+
+  if (googleBtn) {
+   googleBtn.style.display = isTelegramUser ? "none" : "flex";
+   googleBtn.title = isLocalUser ? "Войти через Google" : "Сменить Google";
+   googleBtn.setAttribute("aria-label", googleBtn.title);
+   googleBtn.innerHTML = `<span class="google-icon">G</span>`;
+  }
+
+  if (telegramWidget) {
+   telegramWidget.classList.toggle("telegram-hidden", isTelegramUser || !isLocalUser);
+  }
+
+  if (logoutBtn) logoutBtn.style.display = isLocalUser ? "none" : "inline-block";
+  if (userCard) userCard.style.display = "flex";
+
+  const rawName = this.currentUser.displayName || this.currentUser.username || "User";
+  const name = String(rawName).replace(/^@/, "").trim() || "User";
+  const email = this.currentUser.email || "";
+  const photo = this.currentUser.photoURL || "";
+
+  const userName = document.getElementById("userName");
+  const userEmail = document.getElementById("userEmail");
+  const avatar = document.getElementById("avatar");
+  const uidLabel = document.getElementById("uidLabel");
+  const currentUserIdInput = document.getElementById("currentUserIdInput");
+  const currentUserEmailInput = document.getElementById("currentUserEmailInput");
+
+  if (userName) userName.textContent = name;
+  if (userEmail) {
+   userEmail.textContent = "";
+   userEmail.style.display = "none";
+  }
+  if (avatar) {
+   avatar.textContent = photo ? "" : name[0].toUpperCase();
+   avatar.style.backgroundImage = photo ? `url(${photo})` : "";
+  }
+  if (uidLabel) uidLabel.textContent = this.currentUser.uid;
+  if (currentUserIdInput) currentUserIdInput.value = this.currentUser.uid;
+  if (currentUserEmailInput) currentUserEmailInput.value = email;
+ },
+
+ setTableTab(tab) {
+  document.querySelectorAll("[data-table-tab]").forEach(btn => {
+   btn.classList.toggle("active", btn.dataset.tableTab === tab);
+  });
+
+  const map = {
+   sheet: "tableTabSheet",
+   settings: "tableTabSettings",
+   history: "tableTabHistory"
+  };
+
+  Object.values(map).forEach(id => {
+   const el = document.getElementById(id);
+   if (el) el.classList.remove("active");
+  });
+
+  const target = document.getElementById(map[tab] || "tableTabSheet");
+  if (target) target.classList.add("active");
+
+  if (tab === "history") this.renderHistory();
+  if (tab === "settings") this.syncSettingsControls();
+ },
+
+ syncSettingsControls() {
+  this.state.tableSettings = this.state.tableSettings || { fitMode: "fit", height: "normal", autosave: "on" };
+
+  const currencySelect = document.getElementById("settingsCurrencySelect");
+  if (currencySelect) {
+   currencySelect.innerHTML = this.currencies.map(([symbol, label]) => {
+    return `<option value="${symbol}" ${symbol === this.state.currency ? "selected" : ""}>${label}</option>`;
+   }).join("");
+  }
+
+  const settingsFitMode = document.getElementById("settingsFitMode");
+  if (settingsFitMode) settingsFitMode.value = this.state.tableSettings.fitMode || "fit";
+
+  const settingsTableHeight = document.getElementById("settingsTableHeight");
+  if (settingsTableHeight) settingsTableHeight.value = this.state.tableSettings.height || "normal";
+
+  const settingsAutosave = document.getElementById("settingsAutosave");
+  if (settingsAutosave) settingsAutosave.value = this.state.tableSettings.autosave || "on";
+ },
+
+ applyTableSettings() {
+  this.state.tableSettings = this.state.tableSettings || { fitMode: "fit", height: "normal", autosave: "on" };
+
+  const sheet = document.getElementById("financeSheet");
+  const wrap = document.getElementById("sheetWrap");
+  const fitMode = document.getElementById("fitMode");
+
+  const mode = this.state.tableSettings.fitMode || "fit";
+  if (fitMode) fitMode.value = mode;
+  if (sheet) {
+   sheet.style.minWidth = mode === "scroll" ? "1600px" : "0";
+   sheet.style.width = mode === "scroll" ? "1600px" : "100%";
+  }
+
+  if (wrap) {
+   const height = this.state.tableSettings.height || "normal";
+   if (height === "compact") wrap.style.maxHeight = "52vh";
+   if (height === "normal") wrap.style.maxHeight = "calc(100vh - 245px)";
+   if (height === "large") wrap.style.maxHeight = "78vh";
+  }
+
+  this.syncSettingsControls();
+ },
+
+ addHistory(action, details) {
+  this.state.history = this.state.history || [];
+  this.state.history.unshift({
+   id: this.uid(),
+   action,
+   details,
+   at: new Date().toISOString()
+  });
+  this.state.history = this.state.history.slice(0, 200);
+ },
+
+ renderHistory() {
+  const list = document.getElementById("historyList");
+  if (!list) return;
+
+  const history = this.state.history || [];
+  if (!history.length) {
+   list.innerHTML = `
+    <div style="min-height:180px;display:grid;place-items:center;border:1px solid var(--line);border-radius:14px;color:var(--muted);text-align:center">
+     <div>
+      <div style="font-size:34px;margin-bottom:10px">↺</div>
+      <b style="color:var(--text)">История пока пустая</b>
+      <p style="margin:8px 0 0;font-size:12px">Измените ячейку или добавьте операцию.</p>
+     </div>
+    </div>
+   `;
+   return;
+  }
+
+  list.innerHTML = history.map(item => `
+   <div class="recent-item">
+    <div class="recent-dot income">↺</div>
+    <div>
+     <div class="recent-title">${this.escape(item.action)}</div>
+     <div class="recent-sub">${this.escape(item.details)}</div>
+    </div>
+    <div class="recent-sub" style="text-align:right">${new Date(item.at).toLocaleString("ru-RU")}</div>
+   </div>
+  `).join("");
+ },
+
+ applyTheme() {
+  const isLight = this.state && this.state.theme === "light";
+  document.body.classList.toggle("light", isLight);
+  const themeBtn = document.getElementById("themeBtn");
+  if (themeBtn) themeBtn.textContent = isLight ? "☀" : "☾";
+ },
+
+ async toggleTheme() {
+  this.state.theme = this.state.theme === "light" ? "dark" : "light";
+  this.applyTheme();
+  await this.save();
+  this.toast(this.state.theme === "light" ? "Светлая тема включена." : "Тёмная тема включена.");
+ },
+
+ setView(view) {
+  document.querySelectorAll(".view").forEach(el => el.classList.toggle("active", el.id === view));
+  document.querySelectorAll("#nav button").forEach(btn => btn.classList.toggle("active", btn.dataset.view === view));
+  this.renderAll();
+ },
+
+ renderCurrencyOptions() {
+  const select = document.getElementById("currencySelect");
+  if (!select) return;
+  const htmlOptions = this.currencies.map(([symbol, label]) => {
+   return `<option value="${symbol}" ${symbol === this.state.currency ? "selected" : ""}>${label}</option>`;
+  }).join("");
+  select.innerHTML = htmlOptions;
+
+  const operationCurrency = document.getElementById("operationCurrency");
+  if (operationCurrency) operationCurrency.innerHTML = this.currencies.map(([symbol, label]) => {
+   return `<option value="${label}" ${symbol === this.state.currency ? "selected" : ""}>${label}</option>`;
+  }).join("");
+ },
+
+ allCategories() {
+  return this.tableGroups().flatMap(group => group.columns).map(col => col[0]).filter(name => name !== "CATEGORY");
+ },
+
+ renderCategoryOptions() {
+  const options = this.allCategories().map(category => `<option>${category}</option>`).join("");
+  ["categoryInput", "budgetCategory", "subCategory"].forEach(id => {
+   const select = document.getElementById(id);
+   if (select) select.innerHTML = options;
+  });
+ },
+
+ renderTypeButtons() {
+  const expenseType = document.getElementById("expenseType");
+  const incomeType = document.getElementById("incomeType");
+  if (expenseType) expenseType.className = this.state.operationType === "expense" ? "active-expense" : "";
+  if (incomeType) incomeType.className = this.state.operationType === "income" ? "active-income" : "";
+ },
+
+ smartFillFromText(text) {
+  const amountMatch = text.match(/-?\d+([.,]\d+)?/);
+  if (amountMatch) {
+   const value = amountMatch[0].replace(",", ".");
+   const amountInput = document.getElementById("amountInput");
+   if (amountInput) amountInput.value = value;
+   this.state.operationType = Number(value) < 0 ? "expense" : "income";
+   this.renderTypeButtons();
+  }
+
+  const lower = text.toLowerCase();
+  const category = this.allCategories().find(cat => lower.includes(cat.toLowerCase()));
+  const categoryInput = document.getElementById("categoryInput");
+  if (category && categoryInput) categoryInput.value = category;
+ },
+
+ async addOperation() {
+  if (!this.currentUser) {
+   this.toast("Сначала войди.");
+   return;
+  }
+
+  const rawAmount = Number(document.getElementById("amountInput")?.value || 0);
+  const amount = Math.abs(rawAmount);
+  const category = document.getElementById("categoryInput")?.value || "Развлечения";
+  const date = document.getElementById("dateInput")?.value || this.today();
+  const description = document.getElementById("descInput")?.value || category;
+  const type = this.state.operationType;
+
+  if (!amount) {
+   this.toast("Введите сумму операции.");
+   return;
+  }
+
+  const sheetKey = this.addValueToSheet(category, amount);
+
+  const operation = {
+   id: this.uid(),
+   amount,
+   category,
+   date,
+   description,
+   type,
+   uid: this.currentUser.uid,
+   sheetKey,
+   sheetCategory: category,
+   sheetAmount: amount,
+   createdAt: new Date().toISOString()
+  };
+
+  this.state.operations.unshift(operation);
+  this.addHistory("Добавлена операция", `${type === "income" ? "Доход" : "Расход"} · ${category} · ${amount}`);
+  await this.save();
+  this.renderAll();
+
+  const amountInput = document.getElementById("amountInput");
+  const descInput = document.getElementById("descInput");
+  if (amountInput) amountInput.value = "";
+  if (descInput) descInput.value = "";
+  this.toast("Операция добавлена в личную таблицу.");
+ },
+
+ addValueToSheet(category, amount) {
+  const colIndex = this.getColumnIndexByCategory(category);
+  if (colIndex === -1) return null;
+
+  for (let row = 5; row <= 32; row++) {
+   const key = `${row}:${colIndex}`;
+   if (!this.state.sheet[key]) {
+    this.state.sheet[key] = amount;
+    return key;
+   }
+  }
+
+  const key = `32:${colIndex}`;
+  this.state.sheet[key] = (Number(this.state.sheet[key]) || 0) + amount;
+  return key;
+ },
+
+ tableGroups() {
+  const groups = this.groups.map(group => ({
+   ...group,
+   columns: group.columns.map(column => [...column])
+  }));
+
+  const customColumns = Array.isArray(this.state?.customColumns) ? this.state.customColumns : [];
+
+  for (const item of customColumns) {
+   const target = groups.find(group => group.className === item.group) || groups[groups.length - 1];
+   if (!target) continue;
+   target.columns.push([item.name, item.type || "saving"]);
+  }
+
+  return groups;
+ },
+
+ openCustomColumnModal() {
+  const modal = document.getElementById("customColumnModal");
+  const input = document.getElementById("customColumnName");
+  if (modal) modal.classList.add("active");
+  if (input) setTimeout(() => input.focus(), 50);
+ },
+
+ closeCustomColumnModal() {
+  const modal = document.getElementById("customColumnModal");
+  if (modal) modal.classList.remove("active");
+ },
+
+ async saveCustomColumn() {
+  const input = document.getElementById("customColumnName");
+  const groupSelect = document.getElementById("customColumnGroup");
+  const name = String(input?.value || "").trim();
+  const group = String(groupSelect?.value || "future");
+
+  if (!name) {
+   this.toast("Введите название пункта.");
+   return;
+  }
+
+  this.state.customColumns = Array.isArray(this.state.customColumns) ? this.state.customColumns : [];
+
+  const exists = this.allCategories().some(category => category.toLowerCase() === name.toLowerCase());
+  if (exists) {
+   this.toast("Такой пункт уже есть в таблице.");
+   return;
+  }
+
+  this.state.customColumns.push({
+   id: this.uid(),
+   name,
+   group,
+   type: group === "life" || group === "fun" ? "expense" : "saving",
+   createdAt: new Date().toISOString()
+  });
+
+  if (input) input.value = "";
+  this.addHistory("Добавлен пункт таблицы", name);
+  await this.save();
+  this.closeCustomColumnModal();
+  this.renderAll();
+  this.setView("table");
+  this.toast("Пункт добавлен в таблицу.");
+ },
+
+ getColumnIndexByCategory(category) {
+  let col = 1;
+  for (const group of this.tableGroups()) {
+   for (const [name] of group.columns) {
+    if (name === category) return col;
+    col++;
+   }
+  }
+  return -1;
+ },
+
+ getColumnMeta(colIndex) {
+  let col = 1;
+  for (const group of this.tableGroups()) {
+   for (const column of group.columns) {
+    if (col === colIndex) return { group, name: column[0], type: column[1] };
+    col++;
+   }
+  }
+  return null;
+ },
+
+ totalColumns() {
+  return this.tableGroups().reduce((sum, group) => sum + group.columns.length, 0);
+ },
+
+ renderSheet() {
+  const table = document.getElementById("financeSheet");
+  if (!table) return;
+
+  const totalColumns = this.totalColumns();
+  const letters = ["", ...Array.from({ length: totalColumns }, (_, i) => this.columnLetter(i))];
+
+  let html = "<thead><tr>";
+  html += `<th class="row-num"></th>`;
+  for (let col = 1; col <= totalColumns; col++) html += `<th>${letters[col]}</th>`;
+  html += "</tr></thead><tbody>";
+
+  html += `<tr><td class="row-num">1</td>`;
+  for (const group of this.tableGroups()) html += `<td colspan="${group.columns.length}" class="group-title ${group.titleClass}">${group.name}</td>`;
+  html += "</tr>";
+
+  html += `<tr><td class="row-num">2</td>`;
+  for (const group of this.tableGroups()) html += `<td colspan="${group.columns.length}" class="group-title ${group.titleClass}">${this.groupPercentText(group)}</td>`;
+  html += "</tr>";
+
+  html += `<tr><td class="row-num">3</td>`;
+  for (const group of this.tableGroups()) {
+   group.columns.forEach(([name], index) => {
+    const className = index === 0 && name === "CATEGORY" ? "label-cell" : group.className;
+    html += `<td class="${className}">${name}</td>`;
+   });
+  }
+  html += "</tr>";
+
+  html += `<tr><td class="row-num">4</td>`;
+  for (const group of this.tableGroups()) {
+   group.columns.forEach(([name]) => {
+    const className = name === "CATEGORY" ? "label-cell" : group.className;
+    html += `<td class="${className}"></td>`;
+   });
+  }
+  html += "</tr>";
+
+  for (let row = 5; row <= 32; row++) {
+   html += `<tr><td class="row-num">${row}</td>`;
+   for (let col = 1; col <= totalColumns; col++) {
+    const meta = this.getColumnMeta(col);
+    const key = `${row}:${col}`;
+    const value = this.state.sheet[key] ?? "";
+    const cellClass = meta?.name === "CATEGORY" ? "label-cell" : meta?.group.className || "";
+    html += `<td class="${cellClass}"><input data-row="${row}" data-col="${col}" value="${this.escape(value)}" /></td>`;
+   }
+   html += "</tr>";
+  }
+
+  // Нижние итоговые строки 33–40 убраны по запросу: таблица заканчивается на строке 32.
+
+  html += "</tbody>";
+  table.innerHTML = html;
+
+  table.querySelectorAll("input").forEach(input => {
+   input.addEventListener("change", async event => {
+    const row = event.target.dataset.row;
+    const col = event.target.dataset.col;
+    const key = `${row}:${col}`;
+    const value = event.target.value.trim();
+
+    const oldValue = this.state.sheet[key] ?? "";
+    if (value === "") delete this.state.sheet[key];
+    else this.state.sheet[key] = value;
+
+    this.addHistory("Изменена ячейка", `Строка ${row}, колонка ${this.columnLetter(Number(col) - 1)}: "${oldValue}" → "${value}"`);
+
+    if ((this.state.tableSettings?.autosave || "on") === "on") {
+     await this.save();
+    }
+    this.renderAll();
+   });
+  });
+ },
+
+ summaryValue(type, col) {
+  const meta = this.getColumnMeta(col);
+  if (!meta || meta.name === "CATEGORY") return "";
+
+  const total = this.columnSum(col);
+  const grand = this.grandExpenseTotal();
+
+  if (type === "received") return total ? this.shortNumber(total) : "0";
+  if (type === "planned") return "0";
+  if (type === "notSpent") return total ? this.shortNumber(-total) : "0";
+  if (type === "total") return total ? this.shortNumber(total) : "0";
+  if (type === "percent") return grand ? ((total / grand) * 100).toFixed(2) + "%" : "0.00%";
+  return "";
+ },
+
+ columnSum(col) {
+  let sum = 0;
+  for (let row = 5; row <= 32; row++) {
+   const raw = this.state.sheet[`${row}:${col}`];
+   const num = Number(String(raw || "").replace(",", "."));
+   if (!Number.isNaN(num)) sum += num;
+  }
+  return sum;
+ },
+
+ grandExpenseTotal() {
+  let total = 0;
+  for (let col = 1; col <= this.totalColumns(); col++) {
+   const meta = this.getColumnMeta(col);
+   if (meta && meta.type !== "label") total += Math.abs(this.columnSum(col));
+  }
+  return total;
+ },
+
+ groupSum(group) {
+  if (!group || !Array.isArray(group.columns)) return 0;
+  let total = 0;
+  let col = 1;
+  for (const currentGroup of this.tableGroups()) {
+   for (const column of currentGroup.columns) {
+    if (currentGroup === group && column[1] !== "label") {
+     total += Math.abs(this.columnSum(col));
+    }
+    col++;
+   }
+  }
+  return total;
+ },
+
+ groupPercentText(group) {
+  const grand = this.grandExpenseTotal();
+  if (!grand) return "";
+  const percent = (this.groupSum(group) / grand) * 100;
+  if (!Number.isFinite(percent) || percent <= 0) return "";
+  return percent.toFixed(0) + "%";
+ },
+
+ totals() {
+  let income = 0;
+  let expense = 0;
+
+  for (let col = 1; col <= this.totalColumns(); col++) {
+   const meta = this.getColumnMeta(col);
+   if (!meta || meta.type === "label") continue;
+
+   const sum = this.columnSum(col);
+   if (meta.type === "income") income += sum;
+   else expense += sum;
+  }
+
+  return { income, expense, balance: income - expense };
+ },
+
+ renderAll() {
+  this.state = this.normalizeState(this.state);
+  this.renderCurrencyOptions();
+  this.renderSheet();
+  this.renderCards();
+  this.renderRecent();
+  this.renderOperationsList();
+  this.renderCharts();
+  this.renderReport();
+  this.renderBudgets();
+  this.renderGoals();
+  this.renderSubscriptions();
+  this.renderDebts();
+  this.renderInvestments();
+  this.renderCategoryOptions();
+  this.applyTableSettings();
+  this.renderHistory();
+  if (this.currentUser) this.renderSignedIn();
+ },
+
+ renderCards() {
+  const totals = this.totals();
+  this.setText("balance", this.money(totals.balance));
+  this.setText("income", this.money(totals.income));
+  this.setText("expense", this.money(-totals.expense));
+  this.setText("goalsCard", "0 из 0");
+  this.setText("goalsPct", "0%");
+
+  this.drawSpark("balanceSpark", [18, 35, 32, 40, 34, 38, 25, 30, 42, 35], "#6d5dfc");
+  this.drawSpark("incomeSpark", [10, 18, 28, 44, 56, 70, 90, 95], "#22c55e");
+  this.drawSpark("expenseSpark", [10, 14, 18, 26, 34, 60, 90, 110], "#f43f5e");
+  this.drawSpark("goalsSpark", [8, 10, 12, 16, 20, 23, 32, 40], "#3b82f6");
+ },
+
+ setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+ },
+
+ renderRecent() {
+  const target = document.getElementById("dashboardRecent");
+  if (target) target.innerHTML = this.recentHTML(this.state.operations.slice(0, 5));
+ },
+
+ renderOperationsList() {
+  const target = document.getElementById("operationsList");
+  if (!target) return;
+  const search = (document.getElementById("globalSearch")?.value || "").toLowerCase();
+  const data = this.state.operations.filter(op => JSON.stringify(op).toLowerCase().includes(search));
+  target.innerHTML = this.recentHTML(data);
+ },
+
+ recentHTML(data) {
+  if (!data.length) {
+   return `
+    <div style="min-height:220px;display:grid;place-items:center;border:1px solid var(--line);border-radius:14px;color:var(--muted);text-align:center">
+     <div>
+      <div style="font-size:40px;margin-bottom:12px">♧</div>
+      <b style="color:var(--text)">Нет операций</b>
+      <p style="margin:8px 0 0;font-size:12px">Добавьте первую операцию в разделе “Операции”</p>
+     </div>
+    </div>
+   `;
+  }
+
+  return data.map(op => `
+   <div class="recent-item">
+    <div class="recent-dot ${op.type}">${op.type === "income" ? "↑" : "↓"}</div>
+    <div>
+     <div class="recent-title">${this.escape(op.description || op.category)}</div>
+     <div class="recent-sub">${this.escape(op.category)}</div>
+    </div>
+    <div>
+     <div class="amount ${op.type === "income" ? "positive" : "negative"}">${op.type === "income" ? "+" : "-"} ${this.money(op.amount)}</div>
+     <div class="recent-sub" style="text-align:right">${this.formatDate(op.date)}</div>
+    </div>
+   </div>
+  `).join("");
+ },
+
+ renderCharts() {
+  this.drawDonut();
+  this.drawLine();
+ },
+
+ drawSpark(id, points, color) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width;
+  const h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  const max = Math.max(...points);
+  const min = Math.min(...points);
+  const pad = 8;
+
+  ctx.beginPath();
+  points.forEach((p, i) => {
+   const x = pad + i * ((w - pad * 2) / (points.length - 1));
+   const y = h - pad - ((p - min) / (max - min || 1)) * (h - pad * 2);
+   if (i === 0) ctx.moveTo(x, y);
+   else ctx.lineTo(x, y);
+  });
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.lineTo(w - pad, h - pad);
+  ctx.lineTo(pad, h - pad);
+  ctx.closePath();
+
+  const grad = ctx.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, color + "55");
+  grad.addColorStop(1, color + "00");
+  ctx.fillStyle = grad;
+  ctx.fill();
+ },
+
+ drawDonut() {
+  const canvas = document.getElementById("donutChart");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width;
+  const h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  const categories = this.categoryTotals().slice(0, 5);
+  const fallback = [["Нет данных", 1]];
+  const data = categories.length ? categories : fallback;
+  const total = data.reduce((s, x) => s + x[1], 0);
+  const colors = ["#22d3ee", "#8b5cf6", "#f43f5e", "#fb923c", "#94a3b8"];
+  let start = -Math.PI / 2;
+
+  data.forEach((item, index) => {
+   const angle = (item[1] / total) * Math.PI * 2;
+   ctx.beginPath();
+   ctx.arc(w / 2, h / 2, 82, start, start + angle);
+   ctx.lineWidth = 34;
+   ctx.strokeStyle = colors[index % colors.length];
+   ctx.stroke();
+   start += angle;
+  });
+
+  const legend = document.getElementById("legend");
+  if (legend) {
+   legend.innerHTML = data.map((item, index) => {
+    const pct = total ? Math.round((item[1] / total) * 100) : 0;
+    return `
+     <div class="legend-item">
+      <span class="legend-color" style="background:${colors[index % colors.length]}"></span>
+      <span>${item[0]}</span>
+      <b>${pct}% &nbsp; ${item[0] === "Нет данных" ? "0" : this.shortNumber(item[1])} ${this.state.currency}</b>
+     </div>
+    `;
+   }).join("");
+  }
+ },
+
+ drawLine() {
+  const canvas = document.getElementById("lineChart");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width;
+  const h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  const points = this.state.operations.length
+   ? this.state.operations.slice(0, 9).map((op, i) => (op.type === "expense" ? op.amount : 0) + i * 5000).reverse()
+   : [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+  const max = Math.max(...points, 1);
+  const min = 0;
+  const pad = 42;
+
+  ctx.strokeStyle = "rgba(255,255,255,.10)";
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 5; i++) {
+   const y = pad + i * ((h - pad * 2) / 4);
+   ctx.beginPath();
+   ctx.moveTo(pad, y);
+   ctx.lineTo(w - pad, y);
+   ctx.stroke();
+  }
+
+  const coords = points.map((p, i) => {
+   const x = pad + i * ((w - pad * 2) / (points.length - 1 || 1));
+   const y = h - pad - ((p - min) / (max - min || 1)) * (h - pad * 2);
+   return [x, y];
+  });
+
+  ctx.beginPath();
+  coords.forEach(([x, y], i) => {
+   if (i === 0) ctx.moveTo(x, y);
+   else ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = "#8b5cf6";
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  ctx.lineTo(w - pad, h - pad);
+  ctx.lineTo(pad, h - pad);
+  ctx.closePath();
+
+  const grad = ctx.createLinearGradient(0, pad, 0, h);
+  grad.addColorStop(0, "rgba(139,92,246,.35)");
+  grad.addColorStop(1, "rgba(139,92,246,0)");
+  ctx.fillStyle = grad;
+  ctx.fill();
+ },
+
+ categoryTotals() {
+  const map = {};
+  for (let col = 1; col <= this.totalColumns(); col++) {
+   const meta = this.getColumnMeta(col);
+   if (!meta || meta.type === "income" || meta.type === "label") continue;
+   const sum = this.columnSum(col);
+   if (sum > 0) map[meta.name] = (map[meta.name] || 0) + sum;
+  }
+  return Object.entries(map).sort((a, b) => b[1] - a[1]);
+ },
+
+
+ numeric(value) {
+  const n = Number(String(value ?? "").replace(",", "."));
+  return Number.isFinite(n) ? n : 0;
+ },
+
+ categorySpent(category) {
+  let total = 0;
+  const colIndex = this.getColumnIndexByCategory(category);
+  if (colIndex > -1) total += this.columnSum(colIndex);
+  for (const op of this.state.operations || []) {
+   if (op.category === category && op.type === "expense") total += Math.abs(Number(op.amount || 0));
+  }
+  return total;
+ },
+
+ percent(value, total) {
+  if (!total) return 0;
+  return Math.max(0, Math.min(100, (value / total) * 100));
+ },
+
+ async addBudget() {
+  const category = document.getElementById("budgetCategory")?.value || "Продукты";
+  const limit = this.numeric(document.getElementById("budgetLimit")?.value);
+  if (!category || limit <= 0) return this.toast("Введите категорию и лимит бюджета.");
+  this.state.budgets.push({ id: this.uid(), category, limit, createdAt: new Date().toISOString() });
+  this.addHistory("Добавлен бюджет", `${category} · ${limit}`);
+  await this.save();
+  document.getElementById("budgetLimit").value = "";
+  this.renderAll();
+  this.toast("Бюджет добавлен.");
+ },
+
+ async deleteBudget(id) {
+  this.state.budgets = this.state.budgets.filter(item => item.id !== id);
+  this.addHistory("Удалён бюджет", id);
+  await this.save();
+  this.renderAll();
+ },
+
+ renderBudgets() {
+  const list = document.getElementById("budgetsList");
+  if (!list) return;
+
+  const budgets = this.state.budgets || [];
+  let totalLimit = 0;
+  let totalUsed = 0;
+
+  for (const item of budgets) {
+   totalLimit += Number(item.limit || 0);
+   totalUsed += this.categorySpent(item.category);
+  }
+
+  this.setText("budgetTotalLimit", this.money(totalLimit));
+  this.setText("budgetTotalUsed", this.money(totalUsed));
+  this.setText("budgetTotalLeft", this.money(Math.max(0, totalLimit - totalUsed)));
+
+  if (!budgets.length) {
+   list.innerHTML = `<div class="empty-state"><div><b>Бюджетов пока нет</b><br><span>Добавь лимит по категории.</span></div></div>`;
+   return;
+  }
+
+  list.innerHTML = budgets.map(item => {
+   const used = this.categorySpent(item.category);
+   const pct = this.percent(used, item.limit);
+   return `
+    <div class="module-item">
+     <div class="module-row">
+      <div>
+       <div class="module-title">${this.escape(item.category)}</div>
+       <div class="module-meta">Потрачено ${this.money(used)} из ${this.money(item.limit)} · остаток ${this.money(Math.max(0, item.limit - used))}</div>
+      </div>
+      <button class="mini-btn danger" onclick="App.deleteBudget('${item.id}')">Удалить</button>
+     </div>
+     <div class="progress"><span style="width:${pct}%"></span></div>
+    </div>
+   `;
+  }).join("");
+ },
+
+ async addGoal() {
+  const name = document.getElementById("goalName")?.value.trim();
+  const target = this.numeric(document.getElementById("goalTarget")?.value);
+  const saved = this.numeric(document.getElementById("goalSaved")?.value);
+  if (!name || target <= 0) return this.toast("Введите название и сумму цели.");
+  this.state.goals.push({ id: this.uid(), name, target, saved, createdAt: new Date().toISOString() });
+  this.addHistory("Добавлена цель", `${name} · ${target}`);
+  await this.save();
+  ["goalName", "goalTarget", "goalSaved"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+  this.renderAll();
+  this.toast("Цель добавлена.");
+ },
+
+ async addGoalMoney(id) {
+  const amount = this.numeric(prompt("Сколько добавить к цели?"));
+  if (amount <= 0) return;
+  const goal = this.state.goals.find(item => item.id === id);
+  if (!goal) return;
+  goal.saved = Number(goal.saved || 0) + amount;
+  this.addHistory("Пополнение цели", `${goal.name} · +${amount}`);
+  await this.save();
+  this.renderAll();
+ },
+
+ async deleteGoal(id) {
+  this.state.goals = this.state.goals.filter(item => item.id !== id);
+  await this.save();
+  this.renderAll();
+ },
+
+ renderGoals() {
+  const list = document.getElementById("goalsList");
+  if (!list) return;
+  const goals = this.state.goals || [];
+  const saved = goals.reduce((s, x) => s + Number(x.saved || 0), 0);
+  const target = goals.reduce((s, x) => s + Number(x.target || 0), 0);
+  this.setText("goalsCountKpi", String(goals.length));
+  this.setText("goalsSavedKpi", this.money(saved));
+  this.setText("goalsTargetKpi", this.money(target));
+
+  if (!goals.length) {
+   list.innerHTML = `<div class="empty-state"><div><b>Целей пока нет</b><br><span>Создай первую финансовую цель.</span></div></div>`;
+   return;
+  }
+
+  list.innerHTML = goals.map(item => {
+   const pct = this.percent(item.saved, item.target);
+   return `
+    <div class="module-item">
+     <div class="module-row">
+      <div>
+       <div class="module-title">${this.escape(item.name)}</div>
+       <div class="module-meta">${this.money(item.saved)} из ${this.money(item.target)} · ${pct.toFixed(1)}%</div>
+      </div>
+      <div>
+       <button class="mini-btn" onclick="App.addGoalMoney('${item.id}')">Пополнить</button>
+       <button class="mini-btn danger" onclick="App.deleteGoal('${item.id}')">Удалить</button>
+      </div>
+     </div>
+     <div class="progress"><span style="width:${pct}%"></span></div>
+    </div>
+   `;
+  }).join("");
+ },
+
+ async addSubscription() {
+  const name = document.getElementById("subName")?.value.trim();
+  const amount = this.numeric(document.getElementById("subAmount")?.value);
+  const category = document.getElementById("subCategory")?.value || "Подписки";
+  const day = Math.min(31, Math.max(1, Math.round(this.numeric(document.getElementById("subDay")?.value) || 1)));
+  if (!name || amount <= 0) return this.toast("Введите название и сумму подписки.");
+  this.state.subscriptions.push({ id: this.uid(), name, amount, category, day, createdAt: new Date().toISOString() });
+  this.addHistory("Добавлена подписка", `${name} · ${amount}`);
+  await this.save();
+  ["subName", "subAmount", "subDay"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+  this.renderAll();
+  this.toast("Подписка добавлена.");
+ },
+
+ async deleteSubscription(id) {
+  this.state.subscriptions = this.state.subscriptions.filter(item => item.id !== id);
+  await this.save();
+  this.renderAll();
+ },
+
+ renderSubscriptions() {
+  const list = document.getElementById("subsList");
+  if (!list) return;
+  const subs = this.state.subscriptions || [];
+  const month = subs.reduce((s, x) => s + Number(x.amount || 0), 0);
+  this.setText("subsCountKpi", String(subs.length));
+  this.setText("subsMonthKpi", this.money(month));
+  this.setText("subsYearKpi", this.money(month * 12));
+
+  if (!subs.length) {
+   list.innerHTML = `<div class="empty-state"><div><b>Подписок пока нет</b><br><span>Добавь регулярный платёж.</span></div></div>`;
+   return;
+  }
+
+  list.innerHTML = subs.map(item => `
+   <div class="module-item">
+    <div class="module-row">
+     <div>
+      <div class="module-title">${this.escape(item.name)}</div>
+      <div class="module-meta">${this.money(item.amount)} / месяц · ${this.escape(item.category)} · списание ${item.day} числа</div>
+     </div>
+     <button class="mini-btn danger" onclick="App.deleteSubscription('${item.id}')">Удалить</button>
+    </div>
+   </div>
+  `).join("");
+ },
+
+ async addDebt() {
+  const name = document.getElementById("debtName")?.value.trim();
+  const total = this.numeric(document.getElementById("debtTotal")?.value);
+  const paid = this.numeric(document.getElementById("debtPaid")?.value);
+  const payment = this.numeric(document.getElementById("debtPayment")?.value);
+  if (!name || total <= 0) return this.toast("Введите название и сумму долга.");
+  this.state.debts.push({ id: this.uid(), name, total, paid, payment, createdAt: new Date().toISOString() });
+  this.addHistory("Добавлен долг", `${name} · ${total}`);
+  await this.save();
+  ["debtName", "debtTotal", "debtPaid", "debtPayment"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+  this.renderAll();
+  this.toast("Долг добавлен.");
+ },
+
+ async addDebtPayment(id) {
+  const amount = this.numeric(prompt("Сумма платежа по долгу?"));
+  if (amount <= 0) return;
+  const debt = this.state.debts.find(item => item.id === id);
+  if (!debt) return;
+  debt.paid = Math.min(Number(debt.total || 0), Number(debt.paid || 0) + amount);
+  this.addHistory("Платёж по долгу", `${debt.name} · +${amount}`);
+  await this.save();
+  this.renderAll();
+ },
+
+ async deleteDebt(id) {
+  this.state.debts = this.state.debts.filter(item => item.id !== id);
+  await this.save();
+  this.renderAll();
+ },
+
+ renderDebts() {
+  const list = document.getElementById("debtsList");
+  if (!list) return;
+  const debts = this.state.debts || [];
+  const total = debts.reduce((s, x) => s + Number(x.total || 0), 0);
+  const paid = debts.reduce((s, x) => s + Number(x.paid || 0), 0);
+  this.setText("debtsTotalKpi", this.money(total));
+  this.setText("debtsPaidKpi", this.money(paid));
+  this.setText("debtsLeftKpi", this.money(Math.max(0, total - paid)));
+
+  if (!debts.length) {
+   list.innerHTML = `<div class="empty-state"><div><b>Долгов пока нет</b><br><span>Добавь кредит, рассрочку или личный долг.</span></div></div>`;
+   return;
+  }
+
+  list.innerHTML = debts.map(item => {
+   const pct = this.percent(item.paid, item.total);
+   return `
+    <div class="module-item">
+     <div class="module-row">
+      <div>
+       <div class="module-title">${this.escape(item.name)}</div>
+       <div class="module-meta">Оплачено ${this.money(item.paid)} из ${this.money(item.total)} · осталось ${this.money(Math.max(0, item.total - item.paid))} · платёж ${this.money(item.payment || 0)}</div>
+      </div>
+      <div>
+       <button class="mini-btn" onclick="App.addDebtPayment('${item.id}')">Платёж</button>
+       <button class="mini-btn danger" onclick="App.deleteDebt('${item.id}')">Удалить</button>
+      </div>
+     </div>
+     <div class="progress"><span style="width:${pct}%"></span></div>
+    </div>
+   `;
+  }).join("");
+ },
+
+ async addInvestment() {
+  const name = document.getElementById("assetName")?.value.trim();
+  const qty = this.numeric(document.getElementById("assetQty")?.value);
+  const buy = this.numeric(document.getElementById("assetBuy")?.value);
+  const now = this.numeric(document.getElementById("assetNow")?.value);
+  if (!name || qty <= 0 || buy <= 0) return this.toast("Введите актив, количество и цену покупки.");
+  this.state.investments.push({ id: this.uid(), name, qty, buy, now: now || buy, createdAt: new Date().toISOString() });
+  this.addHistory("Добавлен актив", `${name} · ${qty}`);
+  await this.save();
+  ["assetName", "assetQty", "assetBuy", "assetNow"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+  this.renderAll();
+  this.toast("Актив добавлен.");
+ },
+
+ async updateInvestmentPrice(id) {
+  const asset = this.state.investments.find(item => item.id === id);
+  if (!asset) return;
+  const value = this.numeric(prompt("Новая текущая цена?", asset.now));
+  if (value <= 0) return;
+  asset.now = value;
+  this.addHistory("Обновлена цена актива", `${asset.name} · ${value}`);
+  await this.save();
+  this.renderAll();
+ },
+
+ async deleteInvestment(id) {
+  this.state.investments = this.state.investments.filter(item => item.id !== id);
+  await this.save();
+  this.renderAll();
+ },
+
+ renderInvestments() {
+  const list = document.getElementById("investList");
+  if (!list) return;
+  const assets = this.state.investments || [];
+  const cost = assets.reduce((s, x) => s + Number(x.qty || 0) * Number(x.buy || 0), 0);
+  const value = assets.reduce((s, x) => s + Number(x.qty || 0) * Number(x.now || 0), 0);
+  const pnl = value - cost;
+  this.setText("investCostKpi", this.money(cost));
+  this.setText("investValueKpi", this.money(value));
+  this.setText("investPnlKpi", this.money(pnl));
+
+  if (!assets.length) {
+   list.innerHTML = `<div class="empty-state"><div><b>Активов пока нет</b><br><span>Добавь первый актив портфеля.</span></div></div>`;
+   return;
+  }
+
+  list.innerHTML = assets.map(item => {
+   const costItem = Number(item.qty || 0) * Number(item.buy || 0);
+   const valueItem = Number(item.qty || 0) * Number(item.now || 0);
+   const pnlItem = valueItem - costItem;
+   return `
+    <div class="module-item">
+     <div class="module-row">
+      <div>
+       <div class="module-title">${this.escape(item.name)}</div>
+       <div class="module-meta">Кол-во ${item.qty} · покупка ${this.money(item.buy)} · сейчас ${this.money(item.now)} · PnL ${this.money(pnlItem)}</div>
+      </div>
+      <div>
+       <button class="mini-btn" onclick="App.updateInvestmentPrice('${item.id}')">Цена</button>
+       <button class="mini-btn danger" onclick="App.deleteInvestment('${item.id}')">Удалить</button>
+      </div>
+     </div>
+    </div>
+   `;
+  }).join("");
+ },
+
+ renderReport() {
+  const reportText = document.getElementById("reportText");
+  if (!reportText) return;
+  const totals = this.totals();
+  const lines = [
+   "FINCENTER — ОТЧЁТ",
+   "UID: " + (this.currentUser?.uid || "not signed"),
+   "Email: " + (this.currentUser?.email || "not signed"),
+   "Дата: " + new Date().toLocaleString("ru-RU"),
+   "",
+   "Доходы: " + this.money(totals.income),
+   "Расходы: " + this.money(totals.expense),
+   "Баланс: " + this.money(totals.balance),
+   "Операции: " + this.state.operations.length,
+   "",
+   "Категории:",
+   ...this.categoryTotals().map(([name, value]) => "- " + name + ": " + this.money(value))
+  ];
+  reportText.value = lines.join("\n");
+ },
+
+ exportJSON() {
+  const payload = {
+   user: this.currentUser ? {
+    uid: this.currentUser.uid,
+    email: this.currentUser.email,
+    displayName: this.currentUser.displayName
+   } : null,
+   data: this.state,
+   exportedAt: new Date().toISOString()
+  };
+  this.download("fincenter-" + (this.currentUser?.uid || "local") + ".json", JSON.stringify(payload, null, 2), "application/json");
+  this.toast("JSON экспортирован.");
+ },
+
+ exportCSV() {
+  const rows = [["date", "type", "category", "amount", "description", "uid"]];
+  this.state.operations.forEach(op => rows.push([op.date, op.type, op.category, op.amount, op.description, op.uid]));
+  const csv = rows.map(row => row.map(cell => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(",")).join("\n");
+  this.download("fincenter-" + (this.currentUser?.uid || "local") + "-operations.csv", csv, "text/csv");
+  this.toast("CSV экспортирован.");
+ },
+
+ download(filename, text, type) {
+  const blob = new Blob([text], { type });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(link.href);
+ },
+
+ importFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async () => {
+   try {
+    if (file.name.endsWith(".json")) {
+     const payload = JSON.parse(reader.result);
+     this.state = payload.data || payload;
+    } else {
+     this.importCSV(reader.result);
+    }
+    await this.save();
+    this.renderAll();
+    this.toast("Импорт выполнен.");
+   } catch (error) {
+    console.error(error);
+    this.toast("Не удалось импортировать файл.");
+   }
+  };
+  reader.readAsText(file);
+ },
+
+ importCSV(text) {
+  const lines = text.split(/\r?\n/).slice(1);
+  lines.forEach(line => {
+   if (!line.trim()) return;
+   const cols = line.split(",").map(x => x.replace(/^"|"$/g, ""));
+   const [date, type, category, amount, description] = cols;
+   if (!amount || !category) return;
+   const op = {
+    id: this.uid(),
+    date: date || this.today(),
+    type: type || "expense",
+    category,
+    amount: Math.abs(Number(amount) || 0),
+    description: description || category,
+    uid: this.currentUser?.uid || "local",
+    createdAt: new Date().toISOString()
+   };
+   const sheetKey = this.addValueToSheet(category, op.amount);
+   op.sheetKey = sheetKey;
+   op.sheetCategory = category;
+   op.sheetAmount = op.amount;
+   this.state.operations.unshift(op);
+  });
+ },
+
+ async resetTable() {
+  if (!confirm("Сбросить таблицу только текущего пользователя?")) return;
+  this.state.sheet = {};
+  this.state.operations = [];
+  this.addHistory("Сброс таблицы", "Очищены таблица и операции текущего пользователя");
+  await this.save();
+  this.renderAll();
+  this.toast("Таблица текущего пользователя сброшена.");
+ },
+
+ async clearSheetOnly() {
+  if (!confirm("Очистить только числа в таблице? Операции в истории останутся.")) return;
+  this.state.sheet = {};
+  this.addHistory("Очистка таблицы", "Очищены только ячейки таблицы, операции оставлены");
+  await this.save();
+  this.renderAll();
+  this.toast("Числа в таблице очищены. Операции не удалены.");
+ },
+
+ async clearCurrentUserData() {
+  if (!this.currentUser) return;
+  if (!confirm("Полностью очистить данные текущего пользователя?")) return;
+  await DataService.clear(this.currentUser.uid);
+  this.state = this.defaultState();
+  this.renderAll();
+  this.toast("Данные текущего пользователя очищены.");
+ },
+
+ columnLetter(index) {
+  let result = "";
+  let n = index;
+  do {
+   result = String.fromCharCode(65 + (n % 26)) + result;
+   n = Math.floor(n / 26) - 1;
+  } while (n >= 0);
+  return result;
+ },
+
+ escape(value) {
+  return String(value ?? "")
+   .replaceAll("&", "&amp;")
+   .replaceAll('"', "&quot;")
+   .replaceAll("<", "&lt;")
+   .replaceAll(">", "&gt;");
+ },
+
+ toast(text) {
+  const zone = document.getElementById("toastZone");
+  if (!zone) return;
+  const item = document.createElement("div");
+  item.className = "toast";
+  item.textContent = text;
+  zone.appendChild(item);
+  setTimeout(() => item.remove(), 3200);
+ }
+};
+
+window.App = App;
+
+
+/* PATCHES MOVED AFTER APP DEFINITION: Dashboard Studio + operation delete */
+/* ================= DASHBOARD STUDIO PRO LOGIC FIXED ================= */
+(function(){
+  const WIDGETS = {
+    balance: { title: "Баланс", desc: "Текущий итог аккаунта", icon: "₸", size: "s" },
+    income: { title: "Доходы", desc: "Сумма всех поступлений", icon: "↟", size: "s" },
+    expense: { title: "Расходы", desc: "Сумма всех трат", icon: "↡", size: "s" },
+    net: { title: "Net Flow", desc: "Разница доходов и расходов", icon: "≈", size: "s" },
+    health: { title: "Финансовое здоровье", desc: "Оценка баланса и нагрузки", icon: "♥", size: "m" },
+    recent: { title: "Последние операции", desc: "Свежие записи", icon: "⇄", size: "l" },
+    chart: { title: "Динамика", desc: "Мини-график движения", icon: "◌", size: "l" },
+    goals: { title: "Цели", desc: "Прогресс накоплений", icon: "◎", size: "s" },
+    budgets: { title: "Бюджеты", desc: "Лимиты категорий", icon: "▣", size: "s" },
+    subs: { title: "Подписки", desc: "Регулярные платежи", icon: "▤", size: "s" },
+    debts: { title: "Долги", desc: "Остаток к погашению", icon: "◇", size: "s" },
+    invest: { title: "Инвестиции", desc: "Портфель и результат", icon: "↗", size: "s" },
+    report: { title: "AI-сводка", desc: "Краткий финансовый вывод", icon: "✦", size: "m" }
+  };
+
+  const PRESETS = {
+    aurora: ["balance","income","expense","health","recent","chart","goals"],
+    minimal: ["balance","income","expense","net"],
+    investor: ["balance","income","invest","net","chart","recent"],
+    business: ["income","expense","budgets","debts","recent","chart","report"],
+    control: ["health","budgets","subs","debts","expense","recent"]
+  };
+
+  const DEFAULT_DASHBOARD = {
+    preset: "aurora",
+    cards: PRESETS.aurora.map(id => ({ id, size: WIDGETS[id].size || "s" }))
+  };
+
+  function deepClone(value) {
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function safeText(value) {
+    return String(value ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function ensureDashboardState() {
+    App.state = App.state || {};
+
+    if (!App.state.dashboardStudio || !Array.isArray(App.state.dashboardStudio.cards)) {
+      const old = App.state.dashboard;
+
+      if (old && Array.isArray(old.widgets)) {
+        App.state.dashboardStudio = {
+          preset: old.preset || "aurora",
+          cards: old.widgets
+            .filter(id => WIDGETS[id])
+            .map(id => ({ id, size: WIDGETS[id].size || "s" }))
+        };
+      } else {
+        App.state.dashboardStudio = deepClone(DEFAULT_DASHBOARD);
+      }
+    }
+
+    if (!App.state.dashboardStudio.cards.length) {
+      App.state.dashboardStudio = deepClone(DEFAULT_DASHBOARD);
+    }
+
+    return App.state.dashboardStudio;
+  }
+
+  function getData() {
+    const state = App.state || {};
+
+    const operations = Array.isArray(state.operations) ? state.operations : [];
+    const goals = Array.isArray(state.goals) ? state.goals : [];
+    const budgets = Array.isArray(state.budgets) ? state.budgets : [];
+    const subs = Array.isArray(state.subscriptions) ? state.subscriptions : [];
+    const debts = Array.isArray(state.debts) ? state.debts : [];
+    const investments = Array.isArray(state.investments) ? state.investments : [];
+
+    const income = operations
+      .filter(o => o.type === "income")
+      .reduce((sum, op) => sum + Math.abs(Number(op.amount || 0)), 0);
+
+    const expense = operations
+      .filter(o => o.type !== "income")
+      .reduce((sum, op) => sum + Math.abs(Number(op.amount || 0)), 0);
+
+    const balance = income - expense;
+
+    const goalsSaved = goals.reduce((sum, g) => sum + Number(g.saved || 0), 0);
+    const goalsTarget = goals.reduce((sum, g) => sum + Number(g.target || 0), 0);
+
+    const budgetLimit = budgets.reduce((sum, b) => sum + Number(b.limit || 0), 0);
+
+    const subsMonth = subs.reduce((sum, sub) => sum + Number(sub.amount || 0), 0);
+
+    const debtTotal = debts.reduce((sum, d) => sum + Number(d.total || 0), 0);
+    const debtPaid = debts.reduce((sum, d) => sum + Number(d.paid || 0), 0);
+    const debtLeft = debtTotal - debtPaid;
+
+    const investCost = investments.reduce((sum, item) => {
+      return sum + Number(item.qty || 0) * Number(item.buy || 0);
+    }, 0);
+
+    const investValue = investments.reduce((sum, item) => {
+      return sum + Number(item.qty || 0) * Number(item.now || 0);
+    }, 0);
+
+    const health = Math.max(0, Math.min(100, Math.round(
+      50 +
+      (income ? Math.min(25, (balance / income) * 25) : 0) -
+      (income ? Math.min(20, (debtLeft / Math.max(income, 1)) * 10) : 0) +
+      (goalsTarget ? Math.min(20, (goalsSaved / goalsTarget) * 20) : 0)
+    )));
+
+    return {
+      operations, goals, budgets, subs, debts, investments,
+      income, expense, balance,
+      goalsSaved, goalsTarget,
+      budgetLimit,
+      subsMonth,
+      debtLeft,
+      investCost,
+      investValue,
+      investPnl: investValue - investCost,
+      health
+    };
+  }
+
+  function money(value) {
+    try {
+      return App.money(Number(value || 0));
+    } catch {
+      const currency = App?.state?.currency || "₸";
+      return new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(Number(value || 0)) + " " + currency;
+    }
+  }
+
+  function formatDate(value) {
+    try {
+      return App.formatDate(value);
+    } catch {
+      if (!value) return "";
+      const d = new Date(value);
+      return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleDateString("ru-RU");
+    }
+  }
+
+  async function saveDashboard(message = "Dashboard Studio сохранён.") {
+    try {
+      if (typeof App.save === "function") {
+        await App.save();
+      }
+
+      if (typeof App.toast === "function") {
+        App.toast(message);
+      }
+    } catch (error) {
+      console.warn("Dashboard save error:", error);
+    }
+  }
+
+  function openDashboardStudio() {
+    if (typeof App.setView === "function") {
+      App.setView("dashboards");
+    } else {
+      document.querySelectorAll(".view").forEach(view => view.classList.remove("active"));
+      document.getElementById("dashboards")?.classList.add("active");
+      document.querySelectorAll("#nav button").forEach(button => {
+        button.classList.toggle("active", button.dataset.view === "dashboards");
+      });
+    }
+
+    renderDashboardStudio();
+  }
+
+  function sizeClass(size) {
+    if (size === "m") return "size-m";
+    if (size === "l") return "size-l";
+    if (size === "xl") return "size-xl";
+    return "";
+  }
+
+  function widgetBody(card) {
+    const data = getData();
+    const id = card.id;
+
+    if (id === "balance") {
+      return `<div class="dash-big">${money(data.balance)}</div><div class="dash-muted">Доходы минус расходы.</div>`;
+    }
+
+    if (id === "income") {
+      return `<div class="dash-big positive">${money(data.income)}</div><div class="dash-muted">Все поступления аккаунта.</div>`;
+    }
+
+    if (id === "expense") {
+      return `<div class="dash-big negative">${money(data.expense)}</div><div class="dash-muted">Все расходы аккаунта.</div>`;
+    }
+
+    if (id === "net") {
+      const pct = data.income ? Math.round((data.balance / data.income) * 100) : 0;
+      return `<div class="dash-big ${data.balance >= 0 ? "positive" : "negative"}">${pct}%</div><div class="dash-muted">Доля свободного потока от доходов.</div>`;
+    }
+
+    if (id === "health") {
+      const goalPct = data.goalsTarget ? Math.round(data.goalsSaved / data.goalsTarget * 100) : 0;
+
+      return `
+        <div class="dash-big">${data.health}/100</div>
+        <div class="dash-progress"><span style="width:${data.health}%"></span></div>
+        <div class="dash-metric-row">
+          <div class="dash-metric-mini"><small>Баланс</small><b>${money(data.balance)}</b></div>
+          <div class="dash-metric-mini"><small>Долги</small><b>${money(data.debtLeft)}</b></div>
+          <div class="dash-metric-mini"><small>Цели</small><b>${goalPct}%</b></div>
+        </div>
+      `;
+    }
+
+    if (id === "recent") {
+      const recent = data.operations.slice(-6).reverse();
+
+      if (!recent.length) {
+        return `<div class="empty-state">Операций пока нет.</div>`;
+      }
+
+      return `<div class="dash-list-pro">${
+        recent.map(op => {
+          const income = op.type === "income";
+          const title = op.desc || op.description || op.comment || op.category || "Операция";
+          const category = op.category || (income ? "Доход" : "Расход");
+
+          return `
+            <div class="dash-row-pro">
+              <div>
+                <b>${safeText(title)}</b>
+                <small>${safeText(category)} · ${safeText(formatDate(op.date || op.createdAt))}</small>
+              </div>
+              <strong class="${income ? "positive" : "negative"}">${income ? "+" : "-"}${money(Math.abs(Number(op.amount || 0)))}</strong>
+            </div>
+          `;
+        }).join("")
+      }</div>`;
+    }
+
+    if (id === "chart") {
+      return `<div class="dash-chart-pro"></div><div class="dash-muted">Быстрый визуальный обзор. Детальная аналитика находится в отдельном разделе.</div>`;
+    }
+
+    if (id === "goals") {
+      const pct = data.goalsTarget ? Math.round(data.goalsSaved / data.goalsTarget * 100) : 0;
+
+      return `
+        <div class="dash-big">${pct}%</div>
+        <div class="dash-progress"><span style="width:${Math.min(100, pct)}%"></span></div>
+        <div class="dash-muted">${money(data.goalsSaved)} из ${money(data.goalsTarget)} · целей: ${data.goals.length}</div>
+      `;
+    }
+
+    if (id === "budgets") {
+      return `<div class="dash-big">${data.budgets.length}</div><div class="dash-muted">Лимитов на ${money(data.budgetLimit)}.</div>`;
+    }
+
+    if (id === "subs") {
+      return `<div class="dash-big">${money(data.subsMonth)}</div><div class="dash-muted">${data.subs.length} регулярных платежей в месяц.</div>`;
+    }
+
+    if (id === "debts") {
+      return `<div class="dash-big">${money(data.debtLeft)}</div><div class="dash-muted">Осталось закрыть по долгам.</div>`;
+    }
+
+    if (id === "invest") {
+      return `<div class="dash-big">${money(data.investValue)}</div><div class="dash-muted">PnL: ${money(data.investPnl)} · активов: ${data.investments.length}</div>`;
+    }
+
+    if (id === "report") {
+      const text = data.balance >= 0
+        ? "Финансовый поток положительный. Можно усилить цели или инвестиции."
+        : "Расходы выше доходов. Стоит проверить крупные траты и подписки.";
+
+      return `
+        <div class="dash-big">✦</div>
+        <div class="dash-muted">${safeText(text)}</div>
+        <div class="dash-metric-row">
+          <div class="dash-metric-mini"><small>Операций</small><b>${data.operations.length}</b></div>
+          <div class="dash-metric-mini"><small>Подписок</small><b>${data.subs.length}</b></div>
+          <div class="dash-metric-mini"><small>Бюджетов</small><b>${data.budgets.length}</b></div>
+        </div>
+      `;
+    }
+
+    return `<div class="dash-muted">Виджет не найден.</div>`;
+  }
+
+  function cardHTML(card) {
+    const meta = WIDGETS[card.id];
+
+    if (!meta) return "";
+
+    return `
+      <div class="dash-card-pro ${sizeClass(card.size)}" data-dash-card="${safeText(card.id)}">
+        <div class="dash-card-head">
+          <div class="dash-card-title">
+            <div class="dash-card-icon">${safeText(meta.icon)}</div>
+            <div>
+              <h4>${safeText(meta.title)}</h4>
+              <small>${safeText(meta.desc)}</small>
+            </div>
+          </div>
+          <div class="dash-card-tools">
+            <button class="dash-tool" type="button" data-dash-action="left" data-id="${safeText(card.id)}">←</button>
+            <button class="dash-tool" type="button" data-dash-action="right" data-id="${safeText(card.id)}">→</button>
+            <button class="dash-tool" type="button" data-dash-action="size" data-id="${safeText(card.id)}">${String(card.size || "s").toUpperCase()}</button>
+            <button class="dash-tool" type="button" data-dash-action="remove" data-id="${safeText(card.id)}">×</button>
+          </div>
+        </div>
+        ${widgetBody(card)}
+      </div>
+    `;
+  }
+
+  function renderPresets() {
+    const dashboard = ensureDashboardState();
+
+    document.querySelectorAll("[data-dash-preset]").forEach(button => {
+      button.classList.toggle("active", button.dataset.dashPreset === dashboard.preset);
+
+      if (button.dataset.bound === "1") return;
+
+      button.dataset.bound = "1";
+
+      button.addEventListener("click", async () => {
+        const preset = button.dataset.dashPreset;
+        const ids = PRESETS[preset] || PRESETS.aurora;
+
+        App.state.dashboardStudio = {
+          preset,
+          cards: ids.map(id => ({ id, size: WIDGETS[id].size || "s" }))
+        };
+
+        await saveDashboard("Пресет применён.");
+        renderDashboardStudio();
+      });
+    });
+  }
+
+  function renderLibrary() {
+    const dashboard = ensureDashboardState();
+    const library = document.getElementById("dashWidgetLibrary");
+
+    if (!library) return;
+
+    const active = new Set(dashboard.cards.map(card => card.id));
+
+    library.innerHTML = Object.entries(WIDGETS).map(([id, meta]) => `
+      <div class="dash-widget-pro">
+        <span>
+          <b>${safeText(meta.icon)} ${safeText(meta.title)}</b>
+          <small>${safeText(meta.desc)}</small>
+        </span>
+        <button class="${active.has(id) ? "active" : ""}" type="button" data-dash-add="${safeText(id)}">${active.has(id) ? "✓" : "+"}</button>
+      </div>
+    `).join("");
+
+    library.querySelectorAll("[data-dash-add]").forEach(button => {
+      button.addEventListener("click", async () => {
+        const id = button.dataset.dashAdd;
+        const cards = ensureDashboardState().cards;
+        const index = cards.findIndex(card => card.id === id);
+
+        if (index >= 0) {
+          cards.splice(index, 1);
+        } else {
+          cards.push({ id, size: WIDGETS[id].size || "s" });
+          App.state.dashboardStudio.preset = "custom";
+        }
+
+        await saveDashboard("Виджеты обновлены.");
+        renderDashboardStudio();
+      });
+    });
+  }
+
+  function renderCanvas() {
+    const dashboard = ensureDashboardState();
+    const canvas = document.getElementById("dashCanvas");
+
+    if (!canvas) return;
+
+    dashboard.cards = dashboard.cards.filter(card => WIDGETS[card.id]);
+
+    if (!dashboard.cards.length) {
+      canvas.innerHTML = `
+        <div class="dash-empty-pro">
+          <div>
+            <b>Дашборд пуст</b><br>
+            <span>Добавь виджеты из библиотеки слева или выбери пресет.</span>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    canvas.innerHTML = dashboard.cards.map(cardHTML).join("");
+
+    canvas.querySelectorAll("[data-dash-action]").forEach(button => {
+      button.addEventListener("click", async () => {
+        const id = button.dataset.id;
+        const action = button.dataset.dashAction;
+        const cards = ensureDashboardState().cards;
+        const index = cards.findIndex(card => card.id === id);
+
+        if (index < 0) return;
+
+        if (action === "left" && index > 0) {
+          [cards[index - 1], cards[index]] = [cards[index], cards[index - 1]];
+          App.state.dashboardStudio.preset = "custom";
+        }
+
+        if (action === "right" && index < cards.length - 1) {
+          [cards[index + 1], cards[index]] = [cards[index], cards[index + 1]];
+          App.state.dashboardStudio.preset = "custom";
+        }
+
+        if (action === "remove") {
+          cards.splice(index, 1);
+          App.state.dashboardStudio.preset = "custom";
+        }
+
+        if (action === "size") {
+          const sizes = ["s", "m", "l", "xl"];
+          const current = cards[index].size || "s";
+          cards[index].size = sizes[(sizes.indexOf(current) + 1) % sizes.length];
+          App.state.dashboardStudio.preset = "custom";
+        }
+
+        await saveDashboard("Дашборд обновлён.");
+        renderDashboardStudio();
+      });
+    });
+  }
+
+  function updateCommandLabel() {
+    const label = document.getElementById("dashboardCommandPreset");
+    const dashboard = ensureDashboardState();
+
+    if (!label) return;
+
+    const preset = dashboard.preset || "custom";
+    label.textContent = preset.charAt(0).toUpperCase() + preset.slice(1);
+  }
+
+  function bindGlobalButtons() {
+    const open = document.getElementById("dashboardCommandBtn");
+
+    if (open && open.dataset.bound !== "1") {
+      open.dataset.bound = "1";
+      open.addEventListener("click", openDashboardStudio);
+    }
+
+    const addAll = document.getElementById("dashAddAllBtn");
+
+    if (addAll && addAll.dataset.bound !== "1") {
+      addAll.dataset.bound = "1";
+      addAll.addEventListener("click", async () => {
+        App.state.dashboardStudio = {
+          preset: "custom",
+          cards: Object.keys(WIDGETS).map(id => ({ id, size: WIDGETS[id].size || "s" }))
+        };
+
+        await saveDashboard("Все виджеты добавлены.");
+        renderDashboardStudio();
+      });
+    }
+
+    const reset = document.getElementById("dashResetBtn");
+
+    if (reset && reset.dataset.bound !== "1") {
+      reset.dataset.bound = "1";
+      reset.addEventListener("click", async () => {
+        App.state.dashboardStudio = deepClone(DEFAULT_DASHBOARD);
+        await saveDashboard("Дашборд сброшен.");
+        renderDashboardStudio();
+      });
+    }
+
+    const saveButton = document.getElementById("dashSaveBtn");
+
+    if (saveButton && saveButton.dataset.bound !== "1") {
+      saveButton.dataset.bound = "1";
+      saveButton.addEventListener("click", () => saveDashboard("Дашборд сохранён."));
+    }
+  }
+
+  function renderDashboardStudio() {
+    ensureDashboardState();
+    bindGlobalButtons();
+    renderPresets();
+    renderLibrary();
+    renderCanvas();
+    updateCommandLabel();
+  }
+
+  window.FinCenterDashboardStudio = {
+    render: renderDashboardStudio,
+    open: openDashboardStudio
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(renderDashboardStudio, 0);
+  });
+
+  window.addEventListener("load", () => {
+    setTimeout(renderDashboardStudio, 0);
+  });
+
+  const originalRenderAll = App.renderAll;
+
+  if (typeof originalRenderAll === "function" && !App.__dashboardStudioProFixed) {
+    App.__dashboardStudioProFixed = true;
+
+    App.renderAll = function() {
+      const result = originalRenderAll.apply(this, arguments);
+      setTimeout(renderDashboardStudio, 0);
+      return result;
+    };
+  }
+
+  const originalSetView = App.setView;
+
+  if (typeof originalSetView === "function" && !App.__dashboardStudioSetViewFixed) {
+    App.__dashboardStudioSetViewFixed = true;
+
+    App.setView = function(viewName) {
+      const result = originalSetView.apply(this, arguments);
+
+      if (viewName === "dashboards") {
+        setTimeout(renderDashboardStudio, 0);
+      }
+
+      return result;
+    };
+  }
+
+  setTimeout(renderDashboardStudio, 300);
+  setTimeout(renderDashboardStudio, 1000);
+})();
+
+
+
+
+/* ================= OPERATION DELETE PATCH V4 — BUTTONS + EXACT TABLE SYNC ================= */
+(function(){
+  function getOperations() {
+    if (!window.App || !App.state || !Array.isArray(App.state.operations)) return [];
+    return App.state.operations;
+  }
+
+  function ensureOperationIds() {
+    const operations = getOperations();
+    let changed = false;
+
+    operations.forEach(operation => {
+      if (!operation.id) {
+        operation.id = "op_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+        changed = true;
+      }
+    });
+
+    if (changed && window.App && typeof App.save === "function") {
+      App.save();
+    }
+  }
+
+  function toNumber(value) {
+    const n = Number(String(value ?? "").replace(",", "."));
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function removeOperationAmountFromSheet(operation) {
+    if (!window.App || !App.state || !App.state.sheet || !operation) return false;
+
+    const amount = Math.abs(Number(operation.sheetAmount || operation.amount || 0));
+    const directKey = operation.sheetKey;
+
+    if (directKey && Object.prototype.hasOwnProperty.call(App.state.sheet, directKey)) {
+      const current = toNumber(App.state.sheet[directKey]);
+
+      if (Math.abs(current - amount) < 0.000001) {
+        delete App.state.sheet[directKey];
+        return true;
+      }
+
+      if (current > amount) {
+        const next = current - amount;
+        if (Math.abs(next) < 0.000001) delete App.state.sheet[directKey];
+        else App.state.sheet[directKey] = next;
+        return true;
+      }
+    }
+
+    if (typeof App.getColumnIndexByCategory !== "function") return false;
+
+    const category = operation.sheetCategory || operation.category;
+    if (!category || !amount) return false;
+
+    const colIndex = App.getColumnIndexByCategory(category);
+
+    if (colIndex === -1) return false;
+
+    for (let row = 5; row <= 32; row++) {
+      const key = `${row}:${colIndex}`;
+      const current = toNumber(App.state.sheet[key]);
+
+      if (Math.abs(current - amount) < 0.000001) {
+        delete App.state.sheet[key];
+        return true;
+      }
+    }
+
+    for (let row = 32; row >= 5; row--) {
+      const key = `${row}:${colIndex}`;
+      const current = toNumber(App.state.sheet[key]);
+
+      if (current > amount) {
+        const next = current - amount;
+        if (Math.abs(next) < 0.000001) delete App.state.sheet[key];
+        else App.state.sheet[key] = next;
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  async function deleteOperation(operationId) {
+    const operations = getOperations();
+    const index = operations.findIndex(operation => String(operation.id) === String(operationId));
+
+    if (index < 0) return;
+
+    const operation = operations[index];
+    const amount = Math.abs(Number(operation.amount || 0));
+    const title = operation.desc || operation.description || operation.comment || operation.category || "операцию";
+
+    const ok = confirm(`Удалить ${title} на сумму ${amount}?\n\nУдалится из операций и из таблицы.`);
+    if (!ok) return;
+
+    operations.splice(index, 1);
+
+    const tableChanged = removeOperationAmountFromSheet(operation);
+
+    if (typeof App.addHistory === "function") {
+      App.addHistory(
+        "Удалена операция",
+        `${operation.type === "income" ? "Доход" : "Расход"} · ${operation.category || "Без категории"} · ${amount}`
+      );
+    }
+
+    if (typeof App.save === "function") {
+      await App.save();
+    }
+
+    if (typeof App.renderSheet === "function") {
+      App.renderSheet();
+    }
+
+    if (typeof App.renderAll === "function") {
+      App.renderAll();
+    }
+
+    if (window.FinCenterDashboardStudio && typeof window.FinCenterDashboardStudio.render === "function") {
+      window.FinCenterDashboardStudio.render();
+    }
+
+    if (typeof App.toast === "function") {
+      App.toast(tableChanged ? "Операция удалена из списка и таблицы." : "Операция удалена. В таблице точная сумма не найдена.");
+    }
+
+    setTimeout(addDeleteButtons, 100);
+  }
+
+  function addDeleteButtons() {
+    if (!window.App || !App.state) return;
+
+    ensureOperationIds();
+
+    const operationsList = document.getElementById("operationsList");
+    if (!operationsList) return;
+
+    const operations = getOperations().slice().reverse();
+    const items = Array.from(operationsList.querySelectorAll(".recent-item"));
+
+    items.forEach((item, index) => {
+      if (item.querySelector(".operation-delete-btn")) return;
+
+      const operation = operations[index];
+      if (!operation) return;
+
+      const amountNode = item.querySelector(".amount") || item.lastElementChild;
+      if (!amountNode) return;
+
+      const wrap = document.createElement("div");
+      wrap.className = "operation-actions-wrap";
+
+      amountNode.parentNode.insertBefore(wrap, amountNode);
+      wrap.appendChild(amountNode);
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "operation-delete-btn";
+      btn.textContent = "Удалить";
+      btn.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        deleteOperation(operation.id);
+      });
+
+      wrap.appendChild(btn);
+    });
+  }
+
+  function patchAppRenderers() {
+    if (!window.App || App.__operationDeletePatchV3) return;
+
+    App.__operationDeletePatchV3 = true;
+
+    const oldRenderOperations = App.renderOperations;
+    if (typeof oldRenderOperations === "function") {
+      App.renderOperations = function() {
+        const result = oldRenderOperations.apply(this, arguments);
+        setTimeout(addDeleteButtons, 0);
+        return result;
+      };
+    }
+
+    const oldRenderAll = App.renderAll;
+    if (typeof oldRenderAll === "function") {
+      App.renderAll = function() {
+        const result = oldRenderAll.apply(this, arguments);
+        setTimeout(addDeleteButtons, 0);
+        return result;
+      };
+    }
+  }
+
+  function startObserver() {
+    const list = document.getElementById("operationsList");
+    if (!list || list.dataset.deleteObserver === "1") return;
+
+    list.dataset.deleteObserver = "1";
+
+    const observer = new MutationObserver(() => {
+      setTimeout(addDeleteButtons, 0);
+    });
+
+    observer.observe(list, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  function boot() {
+    patchAppRenderers();
+    ensureOperationIds();
+    addDeleteButtons();
+    startObserver();
+  }
+
+  window.FinCenterDeleteOperation = deleteOperation;
+
+  const interval = setInterval(() => {
+    boot();
+    if (window.App && App.state && Array.isArray(App.state.operations) && document.getElementById("operationsList")) {
+      addDeleteButtons();
+    }
+  }, 250);
+
+  setTimeout(() => clearInterval(interval), 15000);
+
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(boot, 300);
+    setTimeout(boot, 900);
+    setTimeout(boot, 1800);
+  });
+
+  window.addEventListener("load", () => {
+    setTimeout(boot, 300);
+    setTimeout(boot, 1200);
+  });
+})();
+
+
+document.addEventListener("DOMContentLoaded", () => { App.init(); setTimeout(() => AuthService.renderTelegramLoginWidget(), 500); });
+
+ </script>
+
+<div class="modal-overlay" id="customColumnModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Новый пункт таблицы</h3>
+      <button class="icon-btn" id="closeCustomModal" type="button">✕</button>
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label>Название пункта</label>
+        <input id="customColumnName" placeholder="Например: Виза / Переезд / MacBook" />
+      </div>
+
+      <div class="field">
+        <label>Раздел</label>
+        <select id="customColumnGroup">
+          <option value="life">Фонд жизни</option>
+          <option value="fun">Фонд веселья</option>
+          <option value="future">Фонд будущее</option>
+        </select>
+      </div>
+
+      <div class="field full">
+        <button class="purple-btn" id="saveCustomColumnBtn" type="button">Добавить пункт в таблицу</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<script id="telegram-popup-final-v5">
+(function() {
+  const BOT_URL = "https://t.me/my_rashodi_bot?start=site";
+  const CONNECTED_KEY = "fincenter_telegram_connected";
+  const BOT_USED_KEY = "fincenter_telegram_bot_used";
+  const DISMISSED_KEY = "fincenter_telegram_popup_dismissed_until";
+  const FIRST_DELAY_MS = 9000;
+  const INTERVAL_MS = 7 * 60 * 1000;
+  const VISIBLE_MS = 8500;
+  let intervalId = null;
+  let hideId = null;
+
+  function storageGet(key) {
+    try { return localStorage.getItem(key); } catch (_) { return null; }
+  }
+  function storageSet(key, value) {
+    try { localStorage.setItem(key, value); } catch (_) {}
+  }
+  function params() {
+    try { return new URLSearchParams(window.location.search); } catch (_) { return new URLSearchParams(); }
+  }
+  function userLooksTelegramConnected() {
+    try {
+      const user = window.App && window.App.currentUser;
+      const uid = String(user && user.uid || "");
+      const provider = String(user && user.provider || "");
+      return uid.startsWith("telegram:") || uid.startsWith("tg_") || provider === "telegram";
+    } catch (_) { return false; }
+  }
+  function isConnected() {
+    const q = params();
+    const webApp = Boolean(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData);
+    const fromUrl = q.get("telegram_connected") === "1" || q.get("tg_connected") === "1" || Boolean(q.get("tg_id"));
+    const stored = storageGet(CONNECTED_KEY) === "1";
+    const used = storageGet(BOT_USED_KEY) === "1";
+    const appUser = userLooksTelegramConnected();
+    if (webApp || fromUrl || appUser || used) storageSet(CONNECTED_KEY, "1");
+    return webApp || fromUrl || stored || used || appUser;
+  }
+  function dismissed() {
+    return Date.now() < Number(storageGet(DISMISSED_KEY) || 0);
+  }
+  function hide() {
+    const label = document.getElementById("telegramBotLabel");
+    if (label) label.classList.remove("telegram-pop");
+  }
+  function removeTelegramPrompt() {
+    document.body.classList.add("telegram-bot-used");
+    const btn = document.getElementById("telegramBotBtn");
+    const label = document.getElementById("telegramBotLabel");
+    if (btn) btn.classList.add("telegram-connected");
+    if (label) label.classList.add("telegram-connected");
+    hide();
+    if (intervalId) clearInterval(intervalId);
+    if (hideId) clearTimeout(hideId);
+  }
+  function show() {
+    const btn = document.getElementById("telegramBotBtn");
+    const label = document.getElementById("telegramBotLabel");
+    if (!btn || !label) return;
+    if (isConnected()) return removeTelegramPrompt();
+    if (dismissed()) return;
+    btn.href = BOT_URL;
+    label.innerHTML = '<strong>Telegram-бот</strong><span>Подключи бота, чтобы добавлять операции прямо из Telegram.</span>';
+    label.onclick = function() {
+      storageSet(BOT_USED_KEY, "1");
+      storageSet(CONNECTED_KEY, "1");
+      window.open(BOT_URL, "_blank", "noopener");
+      removeTelegramPrompt();
+    };
+    label.classList.add("telegram-pop");
+    if (hideId) clearTimeout(hideId);
+    hideId = setTimeout(hide, VISIBLE_MS);
+  }
+  function init() {
+    const btn = document.getElementById("telegramBotBtn");
+    const label = document.getElementById("telegramBotLabel");
+    if (!btn) return;
+    btn.href = BOT_URL;
+    btn.onclick = function() {
+      storageSet(BOT_USED_KEY, "1");
+      storageSet(CONNECTED_KEY, "1");
+      storageSet(DISMISSED_KEY, String(Date.now() + 24 * 60 * 60 * 1000));
+      window.open(BOT_URL, "_blank", "noopener");
+      removeTelegramPrompt();
+      return false;
+    };
+    if (isConnected()) return removeTelegramPrompt();
+    document.body.classList.remove("telegram-bot-used");
+    if (label) label.classList.remove("telegram-connected", "telegram-pop");
+    setTimeout(show, FIRST_DELAY_MS);
+    if (intervalId) clearInterval(intervalId);
+    intervalId = setInterval(show, INTERVAL_MS);
+  }
+  window.FinCenterTelegram = {
+    markConnected: function() { storageSet(BOT_USED_KEY, "1"); storageSet(CONNECTED_KEY, "1"); removeTelegramPrompt(); },
+    markDisconnected: function() { try { localStorage.removeItem(BOT_USED_KEY); localStorage.removeItem(CONNECTED_KEY); } catch (_) {} init(); },
+    show: show,
+    hide: hide
+  };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+  window.addEventListener("storage", init);
+  setInterval(function() { if (isConnected()) removeTelegramPrompt(); }, 5000);
+})();
+</script>
+
+</body>
+</html>
+<!-- dashboard-wide-telegram-popup-final -->
+
+<!-- username-only-final-build -->
