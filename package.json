@@ -2,12 +2,12 @@
   "name": "fincenter-telegram-full-sync",
   "version": "1.0.0",
   "description": "FinCenter Telegram bot + Express API + Firebase Admin sync",
-  "main": "index.js",
+  "main": "http-wrapper.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js",
+    "start": "npm install --omit=dev && node http-wrapper.js",
     "dev": "node --watch index.js",
-    "check": "node --check index.js && node --check finance-bot.js"
+    "check": "node --check index.js && node --check finance-bot.js && node --check http-wrapper.js"
   },
   "dependencies": {
     "body-parser": "^1.20.3",
