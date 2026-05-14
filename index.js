@@ -1,1 +1,1 @@
-import "./finance-bot.js";
+console.log("index.js ignored");
