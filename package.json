@@ -5,9 +5,9 @@
   "main": "http-wrapper.js",
   "type": "module",
   "scripts": {
-    "start": "npm install --omit=dev && node http-wrapper.js",
-    "dev": "node --watch index.js",
-    "check": "node --check index.js && node --check finance-bot.js && node --check http-wrapper.js"
+    "start": "npm install --omit=dev && node bootstrap-firebase-admin.js && node http-wrapper.js",
+    "dev": "node http-wrapper.js",
+    "check": "node --check index.js && node --check finance-bot.js && node --check http-wrapper.js && node --check bootstrap-firebase-admin.js"
   },
   "dependencies": {
     "body-parser": "^1.20.3",
