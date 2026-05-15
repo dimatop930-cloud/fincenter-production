@@ -1179,6 +1179,205 @@ bot.command("income", async (ctx) => {
   }
 });
 
+
+/* ================= TEXT BUTTON FALLBACKS ================= */
+
+async function replyBalance(ctx) {
+  const tgId = ctx.from.id;
+  return ctx.reply(await getStatsText(tgId), mainKeyboard(tgId));
+}
+
+async function replyPeriod(ctx, period) {
+  const tgId = ctx.from.id;
+  const state = await getUserState(tgId);
+  const operations = filterOperationsByPeriod(state.operations || [], period);
+  const titleMap = {
+    today: "📅 Сегодня",
+    week: "🗓 Эта неделя",
+    month: "🗓 Этот месяц"
+  };
+  return ctx.reply(buildStatsText({ operations }, titleMap[period]), mainKeyboard(tgId));
+}
+
+async function replyExpenses(ctx) {
+  const tgId = ctx.from.id;
+  const state = await getUserState(tgId);
+  const operations = (state.operations || []).filter((op) => op.type !== "income").slice(0, 10);
+  if (!operations.length) return ctx.reply("Расходов пока нет.", mainKeyboard(tgId));
+  return ctx.reply(`🦋 Последние расходы:\n\n${operations.map(operationLine).join("\n")}`, mainKeyboard(tgId));
+}
+
+async function replyIncome(ctx) {
+  const tgId = ctx.from.id;
+  const state = await getUserState(tgId);
+  const operations = (state.operations || []).filter((op) => op.type === "income").slice(0, 10);
+  if (!operations.length) return ctx.reply("Доходов пока нет.", mainKeyboard(tgId));
+  return ctx.reply(`💰 Последние доходы:\n\n${operations.map(operationLine).join("\n")}`, mainKeyboard(tgId));
+}
+
+async function replyHistory(ctx) {
+  const tgId = ctx.from.id;
+  const state = await getUserState(tgId);
+  const operations = (state.operations || []).slice(0, 15);
+  if (!operations.length) return ctx.reply("История пустая.", mainKeyboard(tgId));
+  return ctx.reply(`📜 История операций:\n\n${operations.map(operationLine).join("\n")}`, mainKeyboard(tgId));
+}
+
+async function replyAnalytics(ctx) {
+  const tgId = ctx.from.id;
+  const state = await getUserState(tgId);
+  const operations = state.operations || [];
+  const totalsByCategory = {};
+
+  for (const op of operations) {
+    if (op.type === "income") continue;
+    const category = op.sheetCategory || op.category || "без категории";
+    totalsByCategory[category] = (totalsByCategory[category] || 0) + Math.abs(Number(op.amount || 0));
+  }
+
+  const lines = Object.entries(totalsByCategory)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([category, total], index) => `${index + 1}. ${category}: ${money(total)}`);
+
+  return ctx.reply(lines.length ? `📊 Аналитика расходов:\n\n${lines.join("\n")}` : "Пока нет данных для аналитики.", mainKeyboard(tgId));
+}
+
+async function replyGoals(ctx) {
+  const tgId = ctx.from.id;
+  const state = await getUserState(tgId);
+  const goals = state.goals || [];
+  if (!goals.length) return ctx.reply("🎯 Целей пока нет. Добавь их на сайте.", mainKeyboard(tgId));
+  const text = goals.slice(0, 10).map((goal, index) => {
+    const saved = Number(goal.saved || 0);
+    const target = Number(goal.target || 0);
+    const pct = target ? Math.round((saved / target) * 100) : 0;
+    return `${index + 1}. ${goal.name || "Цель"} — ${money(saved)} из ${money(target)} (${pct}%)`;
+  }).join("\n");
+  return ctx.reply(`🎯 Цели:\n\n${text}`, mainKeyboard(tgId));
+}
+
+async function replySubs(ctx) {
+  const tgId = ctx.from.id;
+  const state = await getUserState(tgId);
+  const subs = state.subscriptions || [];
+  if (!subs.length) return ctx.reply("🔁 Подписок пока нет.", mainKeyboard(tgId));
+  const month = subs.reduce((sum, sub) => sum + Number(sub.amount || 0), 0);
+  const list = subs.slice(0, 10).map((sub, index) => `${index + 1}. ${sub.name || "Подписка"} — ${money(sub.amount)} / месяц`).join("\n");
+  return ctx.reply(`🔁 Подписки\n\n${list}\n\nИтого в месяц: ${money(month)}`, mainKeyboard(tgId));
+}
+
+async function replyLimits(ctx) {
+  const tgId = ctx.from.id;
+  const state = await getUserState(tgId);
+  const budgets = state.budgets || [];
+  if (!budgets.length) return ctx.reply("⚠️ Лимитов пока нет. Добавь бюджеты на сайте.", mainKeyboard(tgId));
+  const text = budgets.slice(0, 10).map((budget, index) => `${index + 1}. ${budget.category || "Категория"} — лимит ${money(budget.limit)}`).join("\n");
+  return ctx.reply(`⚠️ Лимиты:\n\n${text}`, mainKeyboard(tgId));
+}
+
+async function replyExport(ctx) {
+  const tgId = ctx.from.id;
+  const state = await getUserState(tgId);
+  const lines = [
+    "FINCENTER EXPORT",
+    `Дата: ${new Date().toLocaleString("ru-RU")}`,
+    "",
+    buildStatsText(state).trim(),
+    "",
+    "Последние операции:",
+    ...(state.operations || []).slice(0, 20).map(operationLine)
+  ];
+  return ctx.reply(lines.join("\n"), mainKeyboard(tgId));
+}
+
+async function replyUndo(ctx) {
+  const tgId = ctx.from.id;
+  const result = await undoLastOperation(tgId);
+  if (!result.ok) return ctx.reply(result.message, mainKeyboard(tgId));
+  const op = result.operation;
+  const sign = op.type === "income" ? "🟢" : "🔻";
+  return ctx.reply(
+    `↩️ Отменено\n\n${sign} ${money(op.amount)} — ${op.category || op.sheetCategory || "операция"}\nТаблица: ${result.removedFromSheet ? "ячейка очищена" : "ячейка не найдена"}\n\nСайт обновится автоматически.`,
+    mainKeyboard(tgId)
+  );
+}
+
+bot.hears(["💰 Баланс", "💵 Баланс", "Баланс", "📊 Статистика", "Статистика"], async (ctx) => {
+  try { return await replyBalance(ctx); } catch (e) { console.error("TEXT BALANCE ERROR", e); }
+});
+
+bot.hears(["📅 Сегодня", "Сегодня"], async (ctx) => {
+  try { return await replyPeriod(ctx, "today"); } catch (e) { console.error("TEXT TODAY ERROR", e); }
+});
+
+bot.hears(["🗓 Неделя", "📅 Неделя", "Неделя"], async (ctx) => {
+  try { return await replyPeriod(ctx, "week"); } catch (e) { console.error("TEXT WEEK ERROR", e); }
+});
+
+bot.hears(["🗓 Месяц", "🗓️ Месяц", "Месяц"], async (ctx) => {
+  try { return await replyPeriod(ctx, "month"); } catch (e) { console.error("TEXT MONTH ERROR", e); }
+});
+
+bot.hears(["🦋 Расходы", "💸 Расходы", "Расходы"], async (ctx) => {
+  try { return await replyExpenses(ctx); } catch (e) { console.error("TEXT EXPENSES ERROR", e); }
+});
+
+bot.hears(["💰 Доходы", "💸 Доходы", "Доходы"], async (ctx) => {
+  try { return await replyIncome(ctx); } catch (e) { console.error("TEXT INCOME ERROR", e); }
+});
+
+bot.hears(["📜 История", "История"], async (ctx) => {
+  try { return await replyHistory(ctx); } catch (e) { console.error("TEXT HISTORY ERROR", e); }
+});
+
+bot.hears(["📊 Аналитика", "Аналитика"], async (ctx) => {
+  try { return await replyAnalytics(ctx); } catch (e) { console.error("TEXT ANALYTICS ERROR", e); }
+});
+
+bot.hears(["📈 График", "График"], async (ctx) => {
+  return ctx.reply("📈 График доступен в приложении. Нажми кнопку «🌐 Приложение».", mainKeyboard(ctx.from.id));
+});
+
+bot.hears(["🎯 Цели", "Цели"], async (ctx) => {
+  try { return await replyGoals(ctx); } catch (e) { console.error("TEXT GOALS ERROR", e); }
+});
+
+bot.hears(["🔁 Подписки", "Подписки"], async (ctx) => {
+  try { return await replySubs(ctx); } catch (e) { console.error("TEXT SUBS ERROR", e); }
+});
+
+bot.hears(["⚠️ Лимиты", "⚠ Лимиты", "Лимиты"], async (ctx) => {
+  try { return await replyLimits(ctx); } catch (e) { console.error("TEXT LIMITS ERROR", e); }
+});
+
+bot.hears(["📤 Экспорт", "Экспорт"], async (ctx) => {
+  try { return await replyExport(ctx); } catch (e) { console.error("TEXT EXPORT ERROR", e); }
+});
+
+bot.hears(["↩️ Отменить", "↩ Отменить", "Отменить"], async (ctx) => {
+  try { return await replyUndo(ctx); } catch (e) { console.error("TEXT UNDO ERROR", e); return ctx.reply("Не удалось отменить последнюю операцию.", mainKeyboard(ctx.from.id)); }
+});
+
+bot.hears(["ℹ️ Помощь", "ℹ Помощь", "Помощь"], async (ctx) => {
+  return ctx.reply(
+    `ℹ️ Как пользоваться:\n\nРасход: -2500 продукты\nДоход: 500000 зарплата\nОтмена последней операции: кнопка ↩️ Отменить\nСайт сам подтягивает изменения через облако.`,
+    mainKeyboard(ctx.from.id)
+  );
+});
+
+bot.hears(["➕ Расход", "+ Расход", "Расход"], async (ctx) => {
+  return ctx.reply("🔻 Отправь расход сообщением:\n\n-2500 Продукты\n-5000 Такси", mainKeyboard(ctx.from.id));
+});
+
+bot.hears(["💸 Доход", "Доход"], async (ctx) => {
+  return ctx.reply("🟢 Отправь доход сообщением:\n\n500000 Зарплата\n12000 подарок", mainKeyboard(ctx.from.id));
+});
+
+bot.hears(["🌐 Приложение", "🌐 Открыть FinCenter", "Открыть FinCenter", "Приложение"], async (ctx) => {
+  return ctx.reply("Открой FinCenter по кнопке ниже:", mainKeyboard(ctx.from.id));
+});
+
 /* ================= MESSAGE PARSER ================= */
 
 bot.on("text", async (ctx) => {
