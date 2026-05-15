@@ -241,6 +241,203 @@ function addValueToSheet(state, category, amount) {
   return null;
 }
 
+function removeValueFromSheet(state, sheetKey, fallbackCategory, amount) {
+  if (!state.sheet || typeof state.sheet !== "object") return false;
+
+  if (sheetKey && Object.prototype.hasOwnProperty.call(state.sheet, sheetKey)) {
+    delete state.sheet[sheetKey];
+    return true;
+  }
+
+  const colIndex = getColumnIndexByCategory(fallbackCategory);
+  if (colIndex === -1) return false;
+
+  const target = Math.abs(Number(amount || 0));
+
+  for (let row = 32; row >= 5; row--) {
+    const key = `${row}:${colIndex}`;
+    const current = Math.abs(Number(String(state.sheet[key] || "").replace(",", ".")));
+
+    if (current === target) {
+      delete state.sheet[key];
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function getPeriodStart(period) {
+  const now = new Date();
+  const start = new Date(now);
+
+  if (period === "today") {
+    start.setHours(0, 0, 0, 0);
+    return start;
+  }
+
+  if (period === "week") {
+    const day = start.getDay() || 7;
+    start.setDate(start.getDate() - day + 1);
+    start.setHours(0, 0, 0, 0);
+    return start;
+  }
+
+  if (period === "month") {
+    start.setDate(1);
+    start.setHours(0, 0, 0, 0);
+    return start;
+  }
+
+  return new Date(0);
+}
+
+function filterOperationsByPeriod(operations, period) {
+  const start = getPeriodStart(period);
+
+  return (operations || []).filter((op) => {
+    const value = op.createdAt || op.date;
+    const date = value ? new Date(value) : new Date(0);
+    return !Number.isNaN(date.getTime()) && date >= start;
+  });
+}
+
+function calculateTotals(operations) {
+  const income = (operations || [])
+    .filter((x) => x.type === "income")
+    .reduce((a, b) => a + Math.abs(Number(b.amount || 0)), 0);
+
+  const expense = (operations || [])
+    .filter((x) => x.type !== "income")
+    .reduce((a, b) => a + Math.abs(Number(b.amount || 0)), 0);
+
+  return {
+    income,
+    expense,
+    balance: income - expense,
+    count: (operations || []).length
+  };
+}
+
+function money(value) {
+  return Number(value || 0).toLocaleString("ru-RU") + " ₸";
+}
+
+function operationLine(op, index) {
+  const sign = op.type === "income" ? "🟢" : "🔻";
+  const amount = money(op.amount);
+  const category = op.category || op.sheetCategory || "без категории";
+  const date = op.date || String(op.createdAt || "").slice(0, 10) || "";
+  return `${index + 1}. ${sign} ${amount} — ${category}${date ? ` (${date})` : ""}`;
+}
+
+function buildStatsText(state, title = "🏦 FinCenter") {
+  const totals = calculateTotals(state.operations || []);
+
+  return `
+${title}
+
+💰 Баланс: ${money(totals.balance)}
+📈 Доходы: ${money(totals.income)}
+📉 Расходы: ${money(totals.expense)}
+📦 Операций: ${totals.count}
+`;
+}
+
+async function addBotOperation(tgId, rawText, forcedType = null) {
+  const text = String(rawText || "").trim();
+  const match = text.match(/(-?\d+(?:[.,]\d+)?)/);
+
+  if (!match) {
+    throw new Error("AMOUNT_NOT_FOUND");
+  }
+
+  const rawAmount = Number(match[1].replace(",", "."));
+  const amount = Math.abs(rawAmount);
+
+  if (!amount) {
+    throw new Error("EMPTY_AMOUNT");
+  }
+
+  const type = forcedType || (rawAmount >= 0 ? "income" : "expense");
+  const description = text.replace(match[1], "").trim();
+  const operationCategory = description || (type === "income" ? "доход" : "Развлечения");
+  const sheetCategory = detectSheetCategory(type, operationCategory);
+  const state = await getUserState(tgId);
+  const sheetKey = addValueToSheet(state, sheetCategory, amount);
+
+  const operation = {
+    id: `op_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    amount,
+    category: operationCategory,
+    type,
+    createdAt: new Date().toISOString(),
+    date: new Date().toISOString().slice(0, 10),
+    sheetCategory,
+    sheetKey,
+    source: "telegram"
+  };
+
+  state.telegramConnected = true;
+  state.operations.unshift(operation);
+  state.history.unshift({
+    id: `hist_${Date.now()}`,
+    action: type === "income" ? "Доход из Telegram" : "Расход из Telegram",
+    details: `${operationCategory} · ${amount}`,
+    at: new Date().toISOString()
+  });
+
+  await saveUserState(tgId, state);
+  return { state, operation };
+}
+
+async function undoLastOperation(tgId) {
+  const state = await getUserState(tgId);
+  const operations = Array.isArray(state.operations) ? state.operations : [];
+
+  if (!operations.length) {
+    return { ok: false, message: "Операций пока нет — отменять нечего." };
+  }
+
+  const operation = operations.shift();
+  const removedFromSheet = removeValueFromSheet(
+    state,
+    operation.sheetKey,
+    operation.sheetCategory,
+    operation.sheetAmount || operation.amount
+  );
+
+  state.operations = operations;
+  state.history.unshift({
+    id: `hist_${Date.now()}`,
+    action: "Отмена операции из Telegram",
+    details: `${operation.category || operation.sheetCategory || "операция"} · ${operation.amount}`,
+    at: new Date().toISOString()
+  });
+
+  await saveUserState(tgId, state);
+
+  return {
+    ok: true,
+    operation,
+    removedFromSheet
+  };
+}
+
+function sectionKeyboard(tgId) {
+  return Markup.inlineKeyboard([
+    [Markup.button.webApp("🌐 Открыть приложение", `${WEBAPP_URL}?telegram_connected=1&tg_id=${tgId}`)],
+    [Markup.button.callback("💰 Баланс", "balance"), Markup.button.callback("📅 Сегодня", "period_today")],
+    [Markup.button.callback("🗓 Неделя", "period_week"), Markup.button.callback("🗓 Месяц", "period_month")],
+    [Markup.button.callback("🦋 Расходы", "expenses"), Markup.button.callback("💰 Доходы", "income")],
+    [Markup.button.callback("📊 Аналитика", "analytics"), Markup.button.callback("📈 График", "chart")],
+    [Markup.button.callback("🎯 Цели", "goals"), Markup.button.callback("🔁 Подписки", "subs")],
+    [Markup.button.callback("📜 История", "history"), Markup.button.callback("↩️ Отменить", "undo")],
+    [Markup.button.callback("⚠️ Лимиты", "limits"), Markup.button.callback("📤 Экспорт", "export")],
+    [Markup.button.callback("ℹ️ Помощь", "help")]
+  ]);
+}
+
 /* ================= DEFAULT STATE ================= */
 
 function defaultState() {
@@ -610,42 +807,21 @@ app.post("/api/reset", async (req, res) => {
 
 function mainKeyboard(tgId) {
   return Markup.inlineKeyboard([
-    [
-      Markup.button.webApp(
-        "🌐 Открыть FinCenter",
-        `${WEBAPP_URL}?telegram_connected=1&tg_id=${tgId}`
-      )
-    ],
-    [
-      Markup.button.callback("➕ Расход", "add_expense"),
-      Markup.button.callback("💸 Доход", "add_income")
-    ],
-    [Markup.button.callback("📊 Статистика", "stats")]
+    [Markup.button.webApp("🌐 Приложение", `${WEBAPP_URL}?telegram_connected=1&tg_id=${tgId}`)],
+    [Markup.button.callback("💰 Баланс", "balance"), Markup.button.callback("📅 Сегодня", "period_today")],
+    [Markup.button.callback("🗓 Неделя", "period_week"), Markup.button.callback("🗓 Месяц", "period_month")],
+    [Markup.button.callback("🦋 Расходы", "expenses"), Markup.button.callback("💰 Доходы", "income")],
+    [Markup.button.callback("📊 Аналитика", "analytics"), Markup.button.callback("📈 График", "chart")],
+    [Markup.button.callback("🎯 Цели", "goals"), Markup.button.callback("🔁 Подписки", "subs")],
+    [Markup.button.callback("📜 История", "history"), Markup.button.callback("↩️ Отменить", "undo")],
+    [Markup.button.callback("⚠️ Лимиты", "limits"), Markup.button.callback("📤 Экспорт", "export")],
+    [Markup.button.callback("ℹ️ Помощь", "help")]
   ]);
 }
 
 async function getStatsText(tgId) {
   const state = await getUserState(tgId);
-  const operations = state.operations || [];
-
-  const income = operations
-    .filter((x) => x.type === "income")
-    .reduce((a, b) => a + Math.abs(Number(b.amount || 0)), 0);
-
-  const expense = operations
-    .filter((x) => x.type !== "income")
-    .reduce((a, b) => a + Math.abs(Number(b.amount || 0)), 0);
-
-  const balance = income - expense;
-
-  return `
-🏦 FinCenter
-
-💰 Баланс: ${balance.toLocaleString("ru-RU")} ₸
-📈 Доходы: ${income.toLocaleString("ru-RU")} ₸
-📉 Расходы: ${expense.toLocaleString("ru-RU")} ₸
-📦 Операций: ${operations.length}
-`;
+  return buildStatsText(state);
 }
 
 /* ================= BOT ================= */
@@ -670,17 +846,257 @@ bot.action("stats", async (ctx) => {
     return ctx.editMessageText(text, mainKeyboard(tgId));
   } catch (e) {
     console.error("BOT STATS ERROR", e);
+    return ctx.reply("Ошибка статистики.");
+  }
+});
+
+bot.action("balance", async (ctx) => {
+  try {
+    const tgId = ctx.from.id;
+    const text = await getStatsText(tgId);
+    await ctx.answerCbQuery();
+    return ctx.editMessageText(text, mainKeyboard(tgId));
+  } catch (e) {
+    console.error("BOT BALANCE ACTION ERROR", e);
+    return ctx.reply("Ошибка баланса.");
   }
 });
 
 bot.action("add_expense", async (ctx) => {
   await ctx.answerCbQuery();
-  return ctx.reply(`🔻 Отправь расход:\n\n-2500 Продукты\n-5000 Такси`);
+  return ctx.reply("🔻 Отправь расход сообщением:\n\n-2500 Продукты\n-5000 Такси", mainKeyboard(ctx.from.id));
 });
 
 bot.action("add_income", async (ctx) => {
   await ctx.answerCbQuery();
-  return ctx.reply(`🟢 Отправь доход:\n\n500000 Зарплата`);
+  return ctx.reply("🟢 Отправь доход сообщением:\n\n500000 Зарплата\n12000 подарок", mainKeyboard(ctx.from.id));
+});
+
+bot.action("undo", async (ctx) => {
+  try {
+    const tgId = ctx.from.id;
+    const result = await undoLastOperation(tgId);
+    await ctx.answerCbQuery();
+
+    if (!result.ok) {
+      return ctx.reply(result.message, mainKeyboard(tgId));
+    }
+
+    const op = result.operation;
+    const sign = op.type === "income" ? "🟢" : "🔻";
+
+    return ctx.reply(
+      `↩️ Отменено\n\n${sign} ${money(op.amount)} — ${op.category || op.sheetCategory || "операция"}\nТаблица: ${result.removedFromSheet ? "ячейка очищена" : "ячейка не найдена"}`,
+      mainKeyboard(tgId)
+    );
+  } catch (e) {
+    console.error("UNDO ERROR", e);
+    return ctx.reply("Не удалось отменить последнюю операцию.", mainKeyboard(ctx.from.id));
+  }
+});
+
+bot.action(/^period_(today|week|month)$/, async (ctx) => {
+  try {
+    const tgId = ctx.from.id;
+    const period = ctx.match[1];
+    const state = await getUserState(tgId);
+    const operations = filterOperationsByPeriod(state.operations || [], period);
+    const titleMap = {
+      today: "📅 Сегодня",
+      week: "🗓 Эта неделя",
+      month: "🗓 Этот месяц"
+    };
+
+    await ctx.answerCbQuery();
+    return ctx.editMessageText(buildStatsText({ operations }, titleMap[period]), mainKeyboard(tgId));
+  } catch (e) {
+    console.error("PERIOD ERROR", e);
+    return ctx.reply("Ошибка периода.", mainKeyboard(ctx.from.id));
+  }
+});
+
+bot.action("expenses", async (ctx) => {
+  try {
+    const tgId = ctx.from.id;
+    const state = await getUserState(tgId);
+    const operations = (state.operations || []).filter((op) => op.type !== "income").slice(0, 10);
+
+    await ctx.answerCbQuery();
+
+    if (!operations.length) {
+      return ctx.reply("Расходов пока нет.", mainKeyboard(tgId));
+    }
+
+    return ctx.reply(`🦋 Последние расходы:\n\n${operations.map(operationLine).join("\n")}`, mainKeyboard(tgId));
+  } catch (e) {
+    console.error("EXPENSES ACTION ERROR", e);
+  }
+});
+
+bot.action("income", async (ctx) => {
+  try {
+    const tgId = ctx.from.id;
+    const state = await getUserState(tgId);
+    const operations = (state.operations || []).filter((op) => op.type === "income").slice(0, 10);
+
+    await ctx.answerCbQuery();
+
+    if (!operations.length) {
+      return ctx.reply("Доходов пока нет.", mainKeyboard(tgId));
+    }
+
+    return ctx.reply(`💰 Последние доходы:\n\n${operations.map(operationLine).join("\n")}`, mainKeyboard(tgId));
+  } catch (e) {
+    console.error("INCOME ACTION ERROR", e);
+  }
+});
+
+bot.action("history", async (ctx) => {
+  try {
+    const tgId = ctx.from.id;
+    const state = await getUserState(tgId);
+    const operations = (state.operations || []).slice(0, 15);
+
+    await ctx.answerCbQuery();
+
+    if (!operations.length) {
+      return ctx.reply("История пустая.", mainKeyboard(tgId));
+    }
+
+    return ctx.reply(`📜 История операций:\n\n${operations.map(operationLine).join("\n")}`, mainKeyboard(tgId));
+  } catch (e) {
+    console.error("HISTORY ACTION ERROR", e);
+  }
+});
+
+bot.action("analytics", async (ctx) => {
+  try {
+    const tgId = ctx.from.id;
+    const state = await getUserState(tgId);
+    const operations = state.operations || [];
+    const totalsByCategory = {};
+
+    for (const op of operations) {
+      if (op.type === "income") continue;
+      const category = op.sheetCategory || op.category || "без категории";
+      totalsByCategory[category] = (totalsByCategory[category] || 0) + Math.abs(Number(op.amount || 0));
+    }
+
+    const lines = Object.entries(totalsByCategory)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([category, total], index) => `${index + 1}. ${category}: ${money(total)}`);
+
+    await ctx.answerCbQuery();
+
+    return ctx.reply(
+      lines.length ? `📊 Аналитика расходов:\n\n${lines.join("\n")}` : "Пока нет данных для аналитики.",
+      mainKeyboard(tgId)
+    );
+  } catch (e) {
+    console.error("ANALYTICS ACTION ERROR", e);
+  }
+});
+
+bot.action("chart", async (ctx) => {
+  await ctx.answerCbQuery();
+  return ctx.reply("📈 График доступен в приложении. Нажми кнопку «🌐 Приложение».", mainKeyboard(ctx.from.id));
+});
+
+bot.action("goals", async (ctx) => {
+  try {
+    const tgId = ctx.from.id;
+    const state = await getUserState(tgId);
+    const goals = state.goals || [];
+
+    await ctx.answerCbQuery();
+
+    if (!goals.length) {
+      return ctx.reply("🎯 Целей пока нет. Добавь их на сайте.", mainKeyboard(tgId));
+    }
+
+    const text = goals.slice(0, 10).map((goal, index) => {
+      const saved = Number(goal.saved || 0);
+      const target = Number(goal.target || 0);
+      const pct = target ? Math.round((saved / target) * 100) : 0;
+      return `${index + 1}. ${goal.name || "Цель"} — ${money(saved)} из ${money(target)} (${pct}%)`;
+    }).join("\n");
+
+    return ctx.reply(`🎯 Цели:\n\n${text}`, mainKeyboard(tgId));
+  } catch (e) {
+    console.error("GOALS ACTION ERROR", e);
+  }
+});
+
+bot.action("subs", async (ctx) => {
+  try {
+    const tgId = ctx.from.id;
+    const state = await getUserState(tgId);
+    const subs = state.subscriptions || [];
+
+    await ctx.answerCbQuery();
+
+    if (!subs.length) {
+      return ctx.reply("🔁 Подписок пока нет.", mainKeyboard(tgId));
+    }
+
+    const month = subs.reduce((sum, sub) => sum + Number(sub.amount || 0), 0);
+    const list = subs.slice(0, 10).map((sub, index) => `${index + 1}. ${sub.name || "Подписка"} — ${money(sub.amount)} / месяц`).join("\n");
+
+    return ctx.reply(`🔁 Подписки\n\n${list}\n\nИтого в месяц: ${money(month)}`, mainKeyboard(tgId));
+  } catch (e) {
+    console.error("SUBS ACTION ERROR", e);
+  }
+});
+
+bot.action("limits", async (ctx) => {
+  try {
+    const tgId = ctx.from.id;
+    const state = await getUserState(tgId);
+    const budgets = state.budgets || [];
+
+    await ctx.answerCbQuery();
+
+    if (!budgets.length) {
+      return ctx.reply("⚠️ Лимитов пока нет. Добавь бюджеты на сайте.", mainKeyboard(tgId));
+    }
+
+    const text = budgets.slice(0, 10).map((budget, index) => `${index + 1}. ${budget.category || "Категория"} — лимит ${money(budget.limit)}`).join("\n");
+
+    return ctx.reply(`⚠️ Лимиты:\n\n${text}`, mainKeyboard(tgId));
+  } catch (e) {
+    console.error("LIMITS ACTION ERROR", e);
+  }
+});
+
+bot.action("export", async (ctx) => {
+  try {
+    const tgId = ctx.from.id;
+    const state = await getUserState(tgId);
+    await ctx.answerCbQuery();
+
+    const lines = [
+      "FINCENTER EXPORT",
+      `Дата: ${new Date().toLocaleString("ru-RU")}`,
+      "",
+      buildStatsText(state).trim(),
+      "",
+      "Последние операции:",
+      ...(state.operations || []).slice(0, 20).map(operationLine)
+    ];
+
+    return ctx.reply(lines.join("\n"), mainKeyboard(tgId));
+  } catch (e) {
+    console.error("EXPORT ACTION ERROR", e);
+  }
+});
+
+bot.action("help", async (ctx) => {
+  await ctx.answerCbQuery();
+  return ctx.reply(
+    `ℹ️ Как пользоваться:\n\nРасход: -2500 продукты\nДоход: 500000 зарплата\nОтмена последней операции: кнопка ↩️ Отменить\nСайт сам подтягивает изменения через облако.`,
+    mainKeyboard(ctx.from.id)
+  );
 });
 
 bot.command("balance", async (ctx) => {
@@ -724,15 +1140,43 @@ bot.command("reset", async (ctx) => {
 });
 
 bot.command("add", async (ctx) => {
-  const messageText = String(ctx.message.text || "").replace(/^\/add\s*/i, "-");
-  ctx.message.text = messageText;
-  return bot.handleUpdate(ctx.update);
+  try {
+    const raw = String(ctx.message.text || "").replace(/^\/add\s*/i, "").trim();
+
+    if (!raw) {
+      return ctx.reply("Пример расхода:\n\n/add 2500 продукты", mainKeyboard(ctx.from.id));
+    }
+
+    const { operation } = await addBotOperation(ctx.from.id, `-${raw}`, "expense");
+
+    return ctx.reply(
+      `✅ Расход добавлен: ${money(operation.amount)} — ${operation.category}\nТаблица: ${operation.sheetCategory}\nСайт обновится автоматически.`,
+      mainKeyboard(ctx.from.id)
+    );
+  } catch (e) {
+    console.error("ADD COMMAND ERROR", e);
+    return ctx.reply("Не удалось добавить расход.", mainKeyboard(ctx.from.id));
+  }
 });
 
 bot.command("income", async (ctx) => {
-  const messageText = String(ctx.message.text || "").replace(/^\/income\s*/i, "");
-  ctx.message.text = messageText;
-  return bot.handleUpdate(ctx.update);
+  try {
+    const raw = String(ctx.message.text || "").replace(/^\/income\s*/i, "").trim();
+
+    if (!raw) {
+      return ctx.reply("Пример дохода:\n\n/income 500000 зарплата", mainKeyboard(ctx.from.id));
+    }
+
+    const { operation } = await addBotOperation(ctx.from.id, raw, "income");
+
+    return ctx.reply(
+      `✅ Доход добавлен: ${money(operation.amount)} — ${operation.category}\nТаблица: ${operation.sheetCategory}\nСайт обновится автоматически.`,
+      mainKeyboard(ctx.from.id)
+    );
+  } catch (e) {
+    console.error("INCOME COMMAND ERROR", e);
+    return ctx.reply("Не удалось добавить доход.", mainKeyboard(ctx.from.id));
+  }
 });
 
 /* ================= MESSAGE PARSER ================= */
@@ -744,41 +1188,23 @@ bot.on("text", async (ctx) => {
     if (!text || text.startsWith("/")) return;
 
     const tgId = ctx.from.id;
-    const match = text.match(/(-?\d+(?:[.,]\d+)?)/);
 
-    if (!match) return;
+    const { operation } = await addBotOperation(tgId, text);
 
-    const rawAmount = Number(match[1].replace(",", "."));
-    const amount = Math.abs(rawAmount);
-    const type = rawAmount >= 0 ? "income" : "expense";
-    const description = text.replace(match[1], "").trim();
-    const operationCategory = description || (type === "income" ? "зарплата" : "Развлечения");
-    const sheetCategory = detectSheetCategory(type, operationCategory);
-    const state = await getUserState(tgId);
-    const sheetKey = addValueToSheet(state, sheetCategory, amount);
-
-    const operation = {
-      id: `op_${Date.now()}`,
-      amount,
-      category: operationCategory,
-      type,
-      createdAt: new Date().toISOString(),
-      date: new Date().toISOString().slice(0, 10),
-      sheetCategory,
-      sheetKey
-    };
-
-    state.telegramConnected = true;
-    state.operations.unshift(operation);
-
-    await saveUserState(tgId, state);
+    const sign = operation.type === "income" ? "🟢 Доход" : "🔻 Расход";
 
     return ctx.reply(
-      `✅ Добавлено\n\n${amount.toLocaleString("ru-RU")} ₸\nКатегория: ${operationCategory}\nТаблица: ${sheetCategory}\nЯчейка: ${sheetKey || "не найдена"}`,
+      `✅ Добавлено\n\n${sign}: ${money(operation.amount)}\nКатегория: ${operation.category}\nТаблица: ${operation.sheetCategory}\nЯчейка: ${operation.sheetKey || "не найдена"}\n\nСайт обновится автоматически.`,
       mainKeyboard(tgId)
     );
   } catch (e) {
     console.error("MESSAGE PARSER ERROR", e);
+
+    if (e.message === "AMOUNT_NOT_FOUND" || e.message === "EMPTY_AMOUNT") {
+      return ctx.reply("Не нашёл сумму. Пример:\n\n-2500 продукты\n500000 зарплата", mainKeyboard(ctx.from.id));
+    }
+
+    return ctx.reply("Не удалось добавить операцию. Проверь логи сервера.", mainKeyboard(ctx.from.id));
   }
 });
 
